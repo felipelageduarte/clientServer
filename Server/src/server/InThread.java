@@ -11,16 +11,21 @@ import java.io.ObjectInputStream;
  *
  * @author felipelageduarte
  */
-public class InThread {
+public class InThread implements Runnable{
     
     private ObjectInputStream in;
 
     public InThread(ObjectInputStream in) {
         this.in = in;
     }
-    
-    public Object readObject() throws IOException, ClassNotFoundException{
-        return in.readObject();
+
+    @Override
+    public void run() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    void stop() {
+        
     }
     
 }

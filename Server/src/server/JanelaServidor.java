@@ -138,26 +138,6 @@ public class JanelaServidor extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(PainelServidorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(PainelServidorLayout.createSequentialGroup()
-                        .addComponent(PortLabel)
-                        .addGap(8, 8, 8)
-                        .addComponent(SpinnerPorta, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(LabelInfoPorta))
-                    .addGroup(PainelServidorLayout.createSequentialGroup()
-                        .addGroup(PainelServidorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(ScrollConectados, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, PainelServidorLayout.createSequentialGroup()
-                                .addComponent(LabelListaConectados)
-                                .addGap(159, 159, 159)
-                                .addComponent(StatusBar))
-                            .addGroup(PainelServidorLayout.createSequentialGroup()
-                                .addComponent(Conectar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(Desconectar)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(BCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE))
-                    .addGroup(PainelServidorLayout.createSequentialGroup()
                         .addGap(104, 104, 104)
                         .addGroup(PainelServidorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(PainelServidorLayout.createSequentialGroup()
@@ -167,7 +147,28 @@ public class JanelaServidor extends javax.swing.JFrame {
                             .addGroup(PainelServidorLayout.createSequentialGroup()
                                 .addComponent(IPLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(IPText, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addComponent(IPText, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(PainelServidorLayout.createSequentialGroup()
+                        .addGroup(PainelServidorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(PainelServidorLayout.createSequentialGroup()
+                                .addComponent(PortLabel)
+                                .addGap(8, 8, 8)
+                                .addComponent(SpinnerPorta, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(LabelInfoPorta))
+                            .addGroup(PainelServidorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(ScrollConectados, javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, PainelServidorLayout.createSequentialGroup()
+                                    .addComponent(LabelListaConectados)
+                                    .addGap(159, 159, 159)
+                                    .addComponent(StatusBar))
+                                .addGroup(PainelServidorLayout.createSequentialGroup()
+                                    .addComponent(Conectar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(Desconectar)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(BCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         PainelServidorLayout.setVerticalGroup(
@@ -205,7 +206,7 @@ public class JanelaServidor extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(38, Short.MAX_VALUE)
+                .addContainerGap(62, Short.MAX_VALUE)
                 .addComponent(PainelServidor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(64, 64, 64))
         );
@@ -227,7 +228,7 @@ public class JanelaServidor extends javax.swing.JFrame {
             Desconectar.setEnabled(false);
             Conectar.setEnabled(true);
             Conectado = false;
-            Server.closesocket();
+            Server.stop();
             StatusLabel.setText("Fora do Ar");
             StatusLabel.setForeground(new java.awt.Color(255, 0, 0));
         }
@@ -240,15 +241,18 @@ public class JanelaServidor extends javax.swing.JFrame {
     private void ConectarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ConectarActionPerformed
         if (!Conectado) {
             Conectado = true;
+            System.out.println("1");
             Desconectar.setEnabled(true);
+            System.out.println("2");
             Conectar.setEnabled(false);
-            StatusBar.setText("Esperando Conexão do Cliente");
-            StatusBar.setForeground(new java.awt.Color(0, 255, 0));
-
-            StatusLabel.setText("No Ar");
+            System.out.println("3");
             StatusLabel.setForeground(new java.awt.Color(0, 255, 0));
-            Server = new Servidor(Port);
-            Server.start();
+            System.out.println("4");
+            StatusLabel.setText("No Ar");
+            System.out.println("5");
+            Server = new Server(Port);
+            System.out.println("6");
+            Server.run();
         }
     }//GEN-LAST:event_ConectarActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -270,5 +274,11 @@ public class JanelaServidor extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     public static void main(String[] args) {
+        java.awt.EventQueue.invokeLater(new Runnable() {
+
+            public void run() {
+                new JanelaServidor().setVisible(true);
+            }
+        });
     }
 }
