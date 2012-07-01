@@ -28,6 +28,7 @@ public class Client implements Runnable {
     private ObjectOutputStream out = null;
 
     public Client(String serverAddress, int serverPort) {
+        Log.info("New Client...");
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
     }
@@ -49,35 +50,39 @@ public class Client implements Runnable {
             //get new random number
             challengeNumber = ConnectionChallenge.getNumber();
             //send the random number as challenge to the server
-            out.writeDouble(challengeNumber);
+            out.writeObject(challengeNumber);
             //get the chanllenge answer comming from server
-            ChalengeNumberReceived = in.readDouble();
+            ChalengeNumberReceived = (Double) in.readObject();
             //verify if challenge was responded correctly
             if (Math.abs(ChalengeNumberReceived - ConnectionChallenge.calc(challengeNumber)) < Math.pow(10, -5)) {
                 //send challenge accepted
                 out.writeObject(true);
                 //recive challenge number comming from client side
-                numberReceived = in.readDouble();
+                numberReceived = (Double) in.readObject();
+                System.out.println(numberReceived);
                 //calculate the challenge and send back the result
-                out.writeDouble(ConnectionChallenge.calc(numberReceived));
-
+                out.writeObject(ConnectionChallenge.calc(numberReceived));
+                
                 //wait for connection accepted confirmation comming from client
-                if (in.readBoolean()) {
-                    inThread = new InThread(in);
-                    outThread = new OutThread(out);
-                    inThread.run();
-                    outThread.run();
+                if ((Boolean) in.readObject()) {
+//                    inThread = new InThread(in);
+//                    outThread = new OutThread(out);
+//                    inThread.run();
+//                    outThread.run();
                 } else {
                     Log.info("Connection was not accepted for client");
                     return false;
                 }
             } else {
                 Log.info("Wrong challenge answer");
-                out.writeBoolean(false);
+                out.writeObject(false);
                 return false;
             }
         } catch (IOException ex) {
             Log.fatal("Problem on verify client / server challenge - " + ex.getMessage());
+            return false;
+        }catch (ClassNotFoundException ex) {
+            Log.fatal("ClassNotFoundException - " + ex.getMessage());
             return false;
         }
         return true;
@@ -108,6 +113,7 @@ public class Client implements Runnable {
     @Override
     public void run() {
         try {
+            Log.debug("Trying to connect to server " + this.serverAddress + ":" + this.serverPort);
             socket = new Socket(this.serverAddress, this.serverPort);
         } catch (UnknownHostException ex) {
             Log.error("Server not found - " + ex.getMessage());
@@ -116,13 +122,15 @@ public class Client implements Runnable {
             Log.error("Could not initiate socket - " + ex.getMessage());
             JOptionPane.showMessageDialog(null, "Socket nao criado - Conexão não estabelecida", "I/O Exception", JOptionPane.ERROR_MESSAGE);
         }
-
-        if (connectionChallenge()) {
-            stop();
-        } else {
-            Log.warn("Connection not accept");
-            stop();
+        if (socket != null) {
+            if (connectionChallenge()) {
+                Log.info("Connection established");
+                stop();
+            } else {
+                Log.warn("Connection not accept");
+                stop();
+            }
+            Log.info("Bye...");
         }
-        Log.info("Bye...");
     }
 }

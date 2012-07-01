@@ -33,6 +33,10 @@ public class ServerThread extends Thread {
         return index;
     }
 
+    public Socket getClientSocket() {
+        return clientSocket;
+    }
+
     private boolean connectionChallenge() {
         Double numberReceived,
                 challengeNumber,
@@ -48,23 +52,25 @@ public class ServerThread extends Thread {
 
         try {
             //recive challenge number comming from client side
-            numberReceived = in.readDouble();
+            numberReceived = (Double) in.readObject();
             //calculate the challenge and send back the result
-            out.writeDouble(ConnectionChallenge.calc(numberReceived));
-            if (in.readBoolean()) {
+            out.writeObject(ConnectionChallenge.calc(numberReceived));
+            if ((Boolean) in.readObject()) {
                 //get new random number
                 challengeNumber = ConnectionChallenge.getNumber();
                 //send the random number as challenge to the client
-                out.writeDouble(challengeNumber);
+                out.writeObject(challengeNumber);
+                System.out.println(challengeNumber);
                 //get the chanllenge answer comming from client
-                ChalengeNumberReceived = in.readDouble();
-
+                ChalengeNumberReceived = (Double)in.readObject();
+                
                 //verify if challenge was responded correctly
                 if (Math.abs(ChalengeNumberReceived - ConnectionChallenge.calc(challengeNumber)) < Math.pow(10, -5)) {
+                    System.out.println("here");
                     //Send to client that connection was accepted
-                    out.writeBoolean(true);
+                    out.writeObject(true);
                     //wait for connection accepted confirmation comming from client
-                    if (in.readBoolean()) {
+                    if ((Boolean) in.readObject()) {
                         inThread = new InThread(in);
                         outThread = new OutThread(out);
                         inThread.run();
@@ -75,14 +81,17 @@ public class ServerThread extends Thread {
                     }
                 } else {
                     Log.info("Wrong challenge answer");
-                    out.writeBoolean(false);
+                    out.writeObject(false);
                     return false;
                 }
-            }else{
+            } else {
                 Log.info("Disconnected from client side");
                 return false;
             }
         } catch (IOException ex) {
+            Log.fatal("Problem on verify client / server challenge - " + ex.getMessage());
+            return false;
+        } catch (ClassNotFoundException ex) {
             Log.fatal("Problem on verify client / server challenge - " + ex.getMessage());
             return false;
         }
@@ -113,11 +122,12 @@ public class ServerThread extends Thread {
 
     @Override
     public void run() {
+        Log.info("New ServerThread running...");
         if (connectionChallenge()) {
-            stop();
+            shutdown();
         } else {
             Log.warn("Connection not accept");
-            stop();
+            shutdown();
         }
         Log.info("Bye...");
     }

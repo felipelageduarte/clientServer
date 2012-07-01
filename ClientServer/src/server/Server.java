@@ -4,11 +4,14 @@
  */
 package server;
 
+import Interface.Interface;
 import Log.Log;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 
 public class Server extends Thread {
 
@@ -34,7 +37,7 @@ public class Server extends Thread {
             for (int i = 0; i < serverThread.size(); ++i) {
                 stAux = serverThread.get(i);
                 if (stAux != null) {
-                    stAux.stop();
+                    stAux.shutdown();
                 }
             }
         } catch (IOException e) {
@@ -57,7 +60,11 @@ public class Server extends Thread {
         //try to open server socket
         try {
             this.serverSocket = new ServerSocket(this.serverPort);
+            Log.error("server initiated on address: "
+                    + InetAddress.getLocalHost().getHostAddress() + ":"
+                    + serverPort);
         } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Servidor não pode ser criado: " + ex.getMessage(), "Unknow Host", JOptionPane.WARNING_MESSAGE);
             Log.fatal("Could not create the server: " + ex.getMessage());
         }
 
@@ -66,9 +73,10 @@ public class Server extends Thread {
             try {
                 clientSocket = this.serverSocket.accept();
                 Log.debug("New Client - " + clientSocket.getInetAddress().toString() + ":" + clientSocket.getPort());
+                updateClientListInterface();
             } catch (IOException e) {
                 if (isStopped()) {
-                    Log.warn("Server Stopped.");
+                    Log.info("Server Stopped.");
                     return;
                 }
                 Log.error("Error accepting client connection" + e.getMessage());
@@ -88,7 +96,6 @@ public class Server extends Thread {
             }
 
             //run through Thread vector to remove some thread that already shut down
-            Log.debug("Serching for some dead Thread");
             for (int i = 0; i < serverThread.size(); ++i) {
                 if (serverThread.get(i) == null) {
                     Log.debug("Remove dead Thread from threads vector");
@@ -97,5 +104,18 @@ public class Server extends Thread {
             }
         }
         Log.info("Server Stopped.");
+    }
+
+    private void updateClientListInterface() {
+        String clientList = "";
+        Socket socket;
+        for (int i = 0; i < serverThread.size(); ++i) {
+            if (serverThread.get(i) != null) {
+                socket = serverThread.get(i).getClientSocket();
+                clientList += (i + 1) + " - " + socket.getInetAddress().toString()
+                        + ":" + socket.getPort() + "\n";
+            }
+        }
+        Interface.getInstance().getServerClientListTextArea().setText(clientList);
     }
 }

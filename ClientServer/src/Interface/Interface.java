@@ -12,17 +12,20 @@
 package Interface;
 
 import Client.Client;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import javax.swing.JTextArea;
 import server.Server;
 
 public class Interface extends javax.swing.JFrame {
 
+    private static Interface SINGLETON = null;
     protected int Port = 4000;
     protected Server server = null;
     protected Client client = null;
     protected boolean Conectado;
 
-    public Interface() {
+    private Interface() {
         initComponents();
         serverDisconnectButton.setEnabled(false);
         serverConnectButton.setEnabled(true);
@@ -32,12 +35,43 @@ public class Interface extends javax.swing.JFrame {
         serverIPTextField.setText(localhost());
     }
 
+    public static Interface getInstance() {
+        if (SINGLETON == null) {
+            SINGLETON = new Interface();
+        }
+        return SINGLETON;
+    }
+
+    public JTextArea getServerClientListTextArea() {
+        return serverClientListTextArea;
+    }
+
+    public void setServerClientListTextArea(JTextArea serverClientListTextArea) {
+        this.serverClientListTextArea = serverClientListTextArea;
+    }
+
     private String localhost() {
         try {
             return InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             return new String("0.0.0.0");
         }
+    }
+
+    private void enableClientIntreface(boolean enable) {
+        this.clientCancelButton.setEnabled(enable);
+        this.clientConnectButton.setEnabled(enable);
+        this.clientDisconnectButton.setEnabled(enable);
+        this.clientIPTextField.setEnabled(enable);
+        this.clientPortSpinner.setEnabled(enable);
+    }
+
+    private void enableServerIntreface(boolean enable) {
+        this.serverCancelButton.setEnabled(enable);
+        this.serverConnectButton.setEnabled(enable);
+        this.serverDisconnectButton.setEnabled(enable);
+        this.serverIPTextField.setEnabled(enable);
+        this.serverPortSpinner.setEnabled(enable);
     }
 
     @SuppressWarnings("unchecked")
@@ -86,7 +120,7 @@ public class Interface extends javax.swing.JFrame {
         serverIPTextField.setBackground(new java.awt.Color(204, 204, 204));
         serverIPTextField.setEditable(false);
         serverIPTextField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        serverIPTextField.setText("000.000.000.000");
+        serverIPTextField.setText("127.0.0.1");
         serverIPTextField.setName("serverIPTextField"); // NOI18N
         serverIPTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -109,6 +143,7 @@ public class Interface extends javax.swing.JFrame {
         serverClientListTextArea.setBackground(new java.awt.Color(204, 204, 204));
         serverClientListTextArea.setColumns(20);
         serverClientListTextArea.setEditable(false);
+        serverClientListTextArea.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         serverClientListTextArea.setRows(5);
         serverClientListTextArea.setName("serverClientListTextArea");
         serverClientListScrollPane.setViewportView(serverClientListTextArea);
@@ -200,7 +235,7 @@ public class Interface extends javax.swing.JFrame {
         clientIPLabel.setName("clientIPLabel");
 
         clientIPTextField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        clientIPTextField.setText("000.000.000.000");
+        clientIPTextField.setText("127.0.0.1");
         clientIPTextField.setName("clientIPTextField");
         clientIPTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -211,7 +246,7 @@ public class Interface extends javax.swing.JFrame {
         clientPortLabel.setText("Porta :");
         clientPortLabel.setName("clientPortLabel");
 
-        clientPortSpinner.setModel(new javax.swing.SpinnerNumberModel(4000, 4000, 5000, 1));
+        clientPortSpinner.setModel(new javax.swing.SpinnerNumberModel(8080, 1025, 9999, 1));
         clientPortSpinner.setName("clientPortSpinner");
 
         clientStatusLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
@@ -335,6 +370,7 @@ public class Interface extends javax.swing.JFrame {
             server.shutdown();
             serverStatusLabel.setText("Fora do Ar");
             serverStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
+            this.enableClientIntreface(true);
         }
     }//GEN-LAST:event_serverDisconnectButtonActionPerformed
 
@@ -345,11 +381,12 @@ public class Interface extends javax.swing.JFrame {
     private void serverConnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverConnectButtonActionPerformed
         if (!Conectado) {
             Conectado = true;
+            this.enableClientIntreface(false);
             serverDisconnectButton.setEnabled(true);
             serverConnectButton.setEnabled(false);
             serverStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
             serverStatusLabel.setText("No Ar");
-            server = new Server(Port);
+            server = new Server((Integer)this.serverPortSpinner.getValue());
             server.start();
         }
     }//GEN-LAST:event_serverConnectButtonActionPerformed
@@ -366,19 +403,19 @@ public class Interface extends javax.swing.JFrame {
             clientStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
             clientStatusLabel.setText("No Ar");
             client = new Client(clientIPTextField.getText(),
-                                (Integer)clientPortSpinner.getValue());
+                    (Integer) clientPortSpinner.getValue());
             client.run();
+            this.enableServerIntreface(false);
         }
     }//GEN-LAST:event_clientConnectButtonActionPerformed
 
     private void clientDisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientDisconnectButtonActionPerformed
-        // TODO add your handling code here:
+        this.enableServerIntreface(true);
     }//GEN-LAST:event_clientDisconnectButtonActionPerformed
 
     private void clientCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientCancelButtonActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_clientCancelButtonActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane applicationTabbedPane;
     private javax.swing.JButton clientCancelButton;
@@ -408,8 +445,9 @@ public class Interface extends javax.swing.JFrame {
 
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
+
             public void run() {
-                new Interface().setVisible(true);
+                Interface.getInstance().setVisible(true);
             }
         });
     }
