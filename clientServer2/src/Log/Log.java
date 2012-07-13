@@ -81,7 +81,7 @@ public class Log {
     private String callMeAnyTime() {
         String answer = "";
         try {
-            throw new Exception("Who called me?");
+            throw new Exception("");
         } catch (Exception e) {
             answer = e.getStackTrace()[4].getClassName() + "."
                     + e.getStackTrace()[4].getMethodName();

@@ -1,0 +1,7 @@
+/clientServer2/nbproject/private/
+/clientServer2/build/
+/clientServer/nbproject/private/
+/clientServer/build/
+*.html
+*.log
+*.xml

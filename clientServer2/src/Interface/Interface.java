@@ -1,10 +1,10 @@
 package Interface;
 
-import network.Client;
+import Client.Client;
+import Server.Server;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import javax.swing.JTextArea;
-import network.Server;
 
 public class Interface extends javax.swing.JFrame {
 
@@ -12,6 +12,7 @@ public class Interface extends javax.swing.JFrame {
     protected int Port = 4000;
     protected Server server = null;
     protected Client client = null;
+    //protected Client client = null;
     protected boolean Conectado;
 
     private Interface() {
@@ -22,6 +23,8 @@ public class Interface extends javax.swing.JFrame {
         clientConnectButton.setEnabled(true);
         Conectado = false;
         serverIPTextField.setText(localhost());
+        this.server = new Server();
+        this.client = new Client();
     }
 
     public static Interface getInstance() {
@@ -429,8 +432,7 @@ public class Interface extends javax.swing.JFrame {
             serverConnectButton.setEnabled(false);
             serverStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
             serverStatusLabel.setText("No Ar");
-            server = new Server((Integer) this.serverPortSpinner.getValue());
-            server.start();
+            server.start((Integer) serverPortSpinner.getValue());
         }
     }//GEN-LAST:event_serverConnectButtonActionPerformed
 
@@ -444,24 +446,16 @@ public class Interface extends javax.swing.JFrame {
             clientDisconnectButton.setEnabled(true);
             clientConnectButton.setEnabled(false);
             clientStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
-            clientStatusLabel.setText("Conectado");
-            client = new Client(clientIPTextField.getText(),
-                    (Integer) clientPortSpinner.getValue());
-            client.start();
+            clientStatusLabel.setText("No Ar");
+//            client = new Client(clientIPTextField.getText(),
+//                    );
+            client.start(clientIPTextField.getText(), (Integer) clientPortSpinner.getValue());
             this.enableServerIntreface(false);
         }
     }//GEN-LAST:event_clientConnectButtonActionPerformed
 
     private void clientDisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientDisconnectButtonActionPerformed
-        if (Conectado) {
-            clientDisconnectButton.setEnabled(false);
-            clientConnectButton.setEnabled(true);
-            Conectado = false;
-            client.shutdown();
-            clientStatusLabel.setText("Disconectado");
-            clientStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
-            this.enableServerIntreface(true);
-        }
+        this.enableServerIntreface(true);
     }//GEN-LAST:event_clientDisconnectButtonActionPerformed
 
     private void clientCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientCancelButtonActionPerformed

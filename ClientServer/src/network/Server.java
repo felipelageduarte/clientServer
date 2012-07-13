@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package server;
+package network;
 
 import Interface.Interface;
 import Log.Log;
@@ -18,7 +18,7 @@ public class Server extends Thread {
     protected int serverPort;
     protected ServerSocket serverSocket = null;
     protected Socket clientSocket;
-    protected boolean isStopped = false;
+    protected volatile boolean stop = false;
     protected Thread runningThread = null;
     protected ArrayList<ServerThread> serverThread = null;
 
@@ -29,7 +29,7 @@ public class Server extends Thread {
 
     public synchronized void shutdown() {
         Log.info("Stoping main server thread...");
-        this.isStopped = true;
+        this.stop = true;
         try {
             this.serverSocket.close();
             Log.info("Stoping connection threads...");
@@ -46,7 +46,7 @@ public class Server extends Thread {
     }
 
     public synchronized boolean isStopped() {
-        return this.isStopped;
+        return this.stop;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class Server extends Thread {
         //try to open server socket
         try {
             this.serverSocket = new ServerSocket(this.serverPort);
-            Log.error("server initiated on address: "
+            Log.debug("server initiated on address: "
                     + InetAddress.getLocalHost().getHostAddress() + ":"
                     + serverPort);
         } catch (IOException ex) {
@@ -68,7 +68,7 @@ public class Server extends Thread {
             Log.fatal("Could not create the server: " + ex.getMessage());
         }
 
-        while (!isStopped() && serverSocket != null) {
+        while (!stop && serverSocket != null) {
             clientSocket = null;
             try {
                 clientSocket = this.serverSocket.accept();
@@ -76,8 +76,7 @@ public class Server extends Thread {
                 updateClientListInterface();
             } catch (IOException e) {
                 if (isStopped()) {
-                    Log.info("Server Stopped.");
-                    return;
+                    continue;
                 }
                 Log.error("Error accepting client connection" + e.getMessage());
             }
@@ -103,6 +102,7 @@ public class Server extends Thread {
                 }
             }
         }
+        Interface.getInstance().serverStoped();
         Log.info("Server Stopped.");
     }
 
