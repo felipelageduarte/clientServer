@@ -23,8 +23,8 @@ public class Interface extends javax.swing.JFrame {
         clientConnectButton.setEnabled(true);
         Conectado = false;
         serverIPTextField.setText(localhost());
+        //this.client = new Client();
         this.server = new Server();
-        this.client = new Client();
     }
 
     public static Interface getInstance() {
@@ -414,7 +414,7 @@ public class Interface extends javax.swing.JFrame {
             serverDisconnectButton.setEnabled(false);
             serverConnectButton.setEnabled(true);
             Conectado = false;
-            server.shutdown();
+            server.stop();
             serverStatusLabel.setText("Fora do Ar");
             serverStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
             this.enableClientIntreface(true);

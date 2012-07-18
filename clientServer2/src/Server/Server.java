@@ -1,10 +1,11 @@
 package Server;
 
+import NIOFramework.Buffer;
 import Log.Log;
-import NIOServerFramework.BufferFactory;
-import NIOServerFramework.InputHandlerFactory;
-import NIOServerFramework.NioDispatcher;
-import NIOServerFramework.StandardAcceptor;
+import NIOFramework.BufferFactory;
+import NIOFramework.InputHandlerFactory;
+import NIOFramework.NioDispatcher;
+import NIOFramework.StandardAcceptor;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -22,7 +23,6 @@ public class Server {
     }
 
     public boolean start(int port) {
-
         executor = Executors.newCachedThreadPool();
         bufFactory = new Buffer(1024);
         try {
@@ -31,7 +31,7 @@ public class Server {
             Log.fatal("Server couldn't start", ex);
             return false;
         }
-        factory = (InputHandlerFactory) new Protocol();
+        factory = (InputHandlerFactory) new ServerProtocol();
         try {
             acceptor = new StandardAcceptor(port, dispatcher, factory);
         } catch (IOException ex) {
@@ -60,5 +60,9 @@ public class Server {
         } else {
             Log.error("There is no Server running...");
         }
+    }
+    
+    public void sendMessage(){
+        //this.dispatcher.
     }
 }

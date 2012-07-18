@@ -1,4 +1,4 @@
-package NIOServerFramework;
+package NIOFramework;
 
 /**
  * Created by IntelliJ IDEA. 

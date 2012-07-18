@@ -3,21 +3,21 @@ package network;
 import Log.Log;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.concurrent.SynchronousQueue;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class OutThread extends Thread {
 
     private ObjectOutputStream out;
-    private boolean stop;
+    private Boolean stop;
     private boolean stopped;
-    protected SynchronousQueue<Communication> sendQueue;
+    protected LinkedList<Communication> sendQueue;
 
     public OutThread(ObjectOutputStream out) {
-        this.sendQueue = new SynchronousQueue<Communication>();
+        this.sendQueue = new LinkedList<Communication>();
         this.out = out;
-        this.stop = false;
+        stop = false;
     }
 
     public boolean isStopped() {
@@ -25,18 +25,27 @@ public class OutThread extends Thread {
     }
 
     public void shutdown() {
-        stop = true;
-        if (out != null) {
-            try {
-                out.close();
-            } catch (IOException ex) {
-                Log.error("Out Thread coud not close Output Stream", ex);
-            }
+        synchronized (stop) {
+            stop = true;
         }
     }
 
-    void addRequest(CommunicationType reason, Object request) {
-        sendQueue.offer(new Communication(reason, request));
+    private Boolean isStop() {
+        synchronized (stop) {
+            return stop;
+        }
+    }
+
+    public void addRequest(CommunicationType reason, Object request) {
+        synchronized (sendQueue) {
+            sendQueue.offer(new Communication(reason, request));
+        }
+    }
+
+    private Communication getIncommingRequest() throws InterruptedException {
+        synchronized (sendQueue) {
+            return sendQueue.pollFirst();
+        }
     }
 
     @Override
@@ -45,17 +54,20 @@ public class OutThread extends Thread {
         Log.info("OutThread running...");
         Object obj;
 
-        while (!stop) {
+        while (!isStop()) {
             try {
                 //busy wait for incomming request from client
-                while ((obj = sendQueue.take()) == null && !stop) {
+                while ((obj = getIncommingRequest()) == null) {
                     ServerThread.sleep(100);
+                    if (isStop()) {
+                        break;
+                    }
                 }
-                if (!stop) {
+                if (!isStop()) {
                     try {
                         out.writeObject(obj);
-                    } catch (IOException ex) {                        
-                        stop = true;
+                    } catch (IOException ex) {
+                        shutdown();
                         continue;
                     }
                 }
@@ -63,8 +75,21 @@ public class OutThread extends Thread {
                 Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+
         Log.info("OutThread shuting down...");
-        this.shutdown();
+
+        if (out != null) {
+            try {
+                Log.debug("Closing out socket;");
+                out.close();
+                Log.debug("Closed out socket;");
+            } catch (IOException ex) {
+                Log.error("Out Thread coud not close Output Stream", ex);
+            }
+        }
+
+
+
         this.stopped = true;
     }
 }

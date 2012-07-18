@@ -1,4 +1,4 @@
-package NIOServerFramework;
+package NIOFramework;
 
 import Log.Log;
 import java.io.IOException;

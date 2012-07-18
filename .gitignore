@@ -5,3 +5,6 @@
 *.html
 *.log
 *.xml
+/clientServer2/dist/
+/clientServer3/nbproject/private/
+/clientServer3/build/

@@ -1,4 +1,4 @@
-package NIOServerFramework;
+package NIOFramework;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

@@ -17,25 +17,19 @@
  * The use of the Apache License does not indicate that this project is
  * affiliated with the Apache Software Foundation.
  */
-package NIOServerFramework;
+package NIOFramework;
 
-import java.io.IOException;
-import java.nio.channels.SelectableChannel;
+import java.nio.ByteBuffer;
 
 /**
  * Created by IntelliJ IDEA. 
  * User: ron 
- * Date: Apr 7, 2006 
- * Time: 11:56:30 AM
+ * Date: Apr 5, 2006 
+ * Time: 4:19:05 PM
  */
-public interface Dispatcher {
+public interface BufferFactory {
 
-    void dispatch() throws IOException;
+    ByteBuffer newBuffer();
 
-    void shutdown();
-
-    ChannelFacade registerChannel(SelectableChannel channel, InputHandler handler)
-            throws IOException;
-
-    void unregisterChannel(ChannelFacade key);
+    void returnBuffer(ByteBuffer buffer);
 }

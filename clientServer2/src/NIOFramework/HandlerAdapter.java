@@ -17,7 +17,7 @@
  * The use of the Apache License does not indicate that this project is
  * affiliated with the Apache Software Foundation.
  */
-package NIOServerFramework;
+package NIOFramework;
 
 import Log.Log;
 import java.io.IOException;

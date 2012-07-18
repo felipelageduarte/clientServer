@@ -17,7 +17,7 @@
  * The use of the Apache License does not indicate that this project is
  * affiliated with the Apache Software Foundation.
  */
-package NIOServerFramework;
+package NIOFramework;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -27,17 +27,13 @@ import java.nio.channels.ByteChannel;
  * Created by IntelliJ IDEA. 
  * User: ron 
  * Date: Apr 5, 2006 
- * Time: 4:20:04 PM
+ * Time: 4:20:23 PM
  */
-public interface InputQueue {
-
-    int fillFrom(ByteChannel channel) throws IOException;
+public interface OutputQueue {
 
     boolean isEmpty();
 
-    int indexOf(byte b);
+    int drainTo(ByteChannel channel) throws IOException;
 
-    ByteBuffer dequeueBytes(int count);
-
-    void discardBytes(int count);
+    boolean enqueue(ByteBuffer byteBuffer);
 }

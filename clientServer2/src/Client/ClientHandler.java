@@ -1,18 +1,18 @@
-package Server;
+package Client;
 
-import NIOServerFramework.ChannelFacade;
-import NIOServerFramework.InputHandler;
-import NIOServerFramework.InputQueue;
+import NIOFramework.ChannelFacade;
+import NIOFramework.InputHandler;
+import NIOFramework.InputQueue;
 import java.nio.ByteBuffer;
 
 /**
  * Created by IntelliJ IDEA. User: ron Date: Apr 8, 2006 Time: 5:49:36 PM
  */
-public class Handler implements InputHandler {
+public class ClientHandler implements InputHandler {
 
-    private final Protocol protocol;
+    private final ClientProtocol protocol;
 
-    public Handler(Protocol protocol) {
+    public ClientHandler(ClientProtocol protocol) {
         this.protocol = protocol;
     }
 
@@ -42,21 +42,21 @@ public class Handler implements InputHandler {
 
     @Override
     public void starting(ChannelFacade channelFacade) {
-        System.out.println("NadaHandler: starting");
+        System.out.println("Client Handler: starting");
     }
 
     @Override
     public void started(ChannelFacade channelFacade) {
-        protocol.newUser(channelFacade);
+       System.out.println("Client Handler: started");
     }
 
     @Override
     public void stopping(ChannelFacade channelFacade) {
-        System.out.println("NadaHandler: stopping");
+        System.out.println("Client Handler: stopping");
     }
 
     @Override
     public void stopped(ChannelFacade channelFacade) {
-        protocol.endUser(channelFacade);
+       System.out.println("Client Handler: stopped");
     }
 }

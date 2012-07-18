@@ -17,23 +17,27 @@
  * The use of the Apache License does not indicate that this project is
  * affiliated with the Apache Software Foundation.
  */
-package NIOServerFramework;
+package NIOFramework;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.SocketChannel;
 
 /**
  * Created by IntelliJ IDEA. 
  * User: ron 
- * Date: Apr 5, 2006 
- * Time: 4:20:23 PM
+ * Date: Apr 7, 2006 
+ * Time: 11:56:30 AM
  */
-public interface OutputQueue {
+public interface Dispatcher {
 
-    boolean isEmpty();
+    void dispatch() throws IOException;
 
-    int drainTo(ByteChannel channel) throws IOException;
+    void shutdown();
 
-    boolean enqueue(ByteBuffer byteBuffer);
+    ChannelFacade registerClientChannel(SocketChannel channel, InputHandler handler) throws IOException;
+    
+    ChannelFacade registerChannel(SelectableChannel channel, InputHandler handler) throws IOException;
+
+    void unregisterChannel(ChannelFacade key);
 }

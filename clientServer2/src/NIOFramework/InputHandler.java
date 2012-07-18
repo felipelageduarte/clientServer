@@ -17,7 +17,7 @@
  * The use of the Apache License does not indicate that this project is
  * affiliated with the Apache Software Foundation.
  */
-package NIOServerFramework;
+package NIOFramework;
 
 import java.nio.ByteBuffer;
 
@@ -25,11 +25,19 @@ import java.nio.ByteBuffer;
  * Created by IntelliJ IDEA. 
  * User: ron 
  * Date: Apr 5, 2006 
- * Time: 4:19:05 PM
+ * Time: 4:20:44 PM
  */
-public interface BufferFactory {
+public interface InputHandler {
 
-    ByteBuffer newBuffer();
+    ByteBuffer nextMessage(ChannelFacade channelFacade);
 
-    void returnBuffer(ByteBuffer buffer);
+    void handleInput(ByteBuffer message, ChannelFacade channelFacade);
+
+    void starting(ChannelFacade channelFacade);
+
+    void started(ChannelFacade channelFacade);
+
+    void stopping(ChannelFacade channelFacade);
+
+    void stopped(ChannelFacade channelFacade);
 }

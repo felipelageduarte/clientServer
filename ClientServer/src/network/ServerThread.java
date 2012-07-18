@@ -16,7 +16,7 @@ public class ServerThread extends ArchitectureThread {
 
     private Socket clientSocket;
     private int index;
-    private boolean stop;
+    private Boolean stop;
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
@@ -24,6 +24,7 @@ public class ServerThread extends ArchitectureThread {
         super();
         this.clientSocket = clientSocket;
         this.index = index;
+        stop = false;
     }
 
     public int getIndex() {
@@ -34,8 +35,68 @@ public class ServerThread extends ArchitectureThread {
         return clientSocket;
     }
 
+    private Boolean isStop() {
+        synchronized (stop) {
+            return stop;
+        }
+    }
+
     public void shutdown() {
-        stop = true;
+        synchronized (stop) {
+            stop = true;
+            outThread.addRequest(CommunicationType.Exit, null);
+        }
+    }
+
+    @Override
+    public void run() {
+        Log.info("New ServerThread running...");
+        Communication communication = null;
+
+        // I/O Threads
+        try {
+            inThread = new InThread(this, new ObjectInputStream(clientSocket.getInputStream()));
+            outThread = new OutThread(new ObjectOutputStream(clientSocket.getOutputStream()));
+            inThread.start();
+            outThread.start();
+        } catch (IOException ex) {
+            Log.fatal("could not create Object Stream, Thread sutting down - " + ex.getMessage());
+            stop = true;
+        }
+
+        while (!isStop()) {
+            try {
+                //busy wait for incomming request from client
+                while ((communication = getIncommingRequest()) == null) {
+                    ServerThread.sleep(100);
+                    if (isStop()) {
+                        break;
+                    }
+                }
+                if (!isStop()) {
+                    //process incomming request
+                    switch (communication.getReason()) {
+                        case Exit:
+                            Log.debug("Incomming Exit request");
+                            shutdown();
+                            break;
+                        case ChallengeNumber:
+                            Log.debug("Incomming Challenge Number");
+                            break;
+                        case ChallengeAnswer:
+                            Log.debug("Incomming Challenge Answer");
+                            break;
+                        case Password:
+                            Log.debug("Incomming Password");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         try {
             if (inThread != null) {
                 inThread.shutdown();
@@ -57,54 +118,6 @@ public class ServerThread extends ArchitectureThread {
         } catch (InterruptedException ex) {
             Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    @Override
-    public void run() {
-        Log.info("New ServerThread running...");
-        Communication communication = null;
-
-        // I/O Threads
-        try {
-            inThread = new InThread(this, new ObjectInputStream(clientSocket.getInputStream()));
-            outThread = new OutThread(new ObjectOutputStream(clientSocket.getOutputStream()));
-            inThread.start();
-            outThread.start();
-        } catch (IOException ex) {
-            Log.fatal("could not create Object Stream, Thread sutting down - " + ex.getMessage());
-            stop = true;
-        }
-
-        while (!stop) {
-            try {
-                //busy wait for incomming request from client
-                while ((communication = requestQueue.take()) == null && !stop) {
-                    ServerThread.sleep(100);
-                }
-                if (!stop) {
-                    //process incomming request
-                    switch (communication.getReason()) {
-                        case Exit:
-                            Log.debug("Incomming Exit request");
-                            break;
-                        case ChallengeNumber:
-                            Log.debug("Incomming Challenge Number");
-                            break;
-                        case ChallengeAnswer:
-                            Log.debug("Incomming Challenge Answer");
-                            break;
-                        case Password:
-                            Log.debug("Incomming Password");
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        this.shutdown();
         Log.info("ServerThread shuting down...");
     }
 }

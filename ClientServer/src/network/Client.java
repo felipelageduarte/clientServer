@@ -15,37 +15,25 @@ public class Client extends ArchitectureThread {
     private String serverAddress;
     private int serverPort;
     private Socket socket;
-    private boolean stop;
+    private Boolean stop;
 
     public Client(String serverAddress, int serverPort) {
         Log.info("New Client...");
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
+        stop = false;
+    }
+
+    private Boolean isStop() {
+        synchronized (stop) {
+            return stop;
+        }
     }
 
     public void shutdown() {
-        stop = true;
-        outThread.addRequest(CommunicationType.Exit, null);
-        try {
-            if (inThread != null) {
-                inThread.shutdown();
-                while (!inThread.isStopped()) {
-                    sleep(100);
-                }
-            }
-            if (outThread != null) {
-                outThread.shutdown();
-                while (!outThread.isStopped()) {
-                    sleep(100);
-                }
-            }
-            if (socket != null) {
-                socket.close();
-            }
-        } catch (IOException ex) {
-            Log.error("Problem stoping ServerThread - " + ex.getMessage());
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+        synchronized (stop) {
+            stop = true;
+            outThread.addRequest(CommunicationType.Exit, null);
         }
     }
 
@@ -76,30 +64,33 @@ public class Client extends ArchitectureThread {
                 Log.fatal("could not create Object Stream, Thread sutting down - " + ex.getMessage());
                 stop = true;
             }
-            
-            outThread.addRequest(CommunicationType.ChallengeAnswer, null);
-            outThread.addRequest(CommunicationType.ChallengeNumber, null);
-            outThread.addRequest(CommunicationType.Exit, null);
-            outThread.addRequest(CommunicationType.Password, null);
-            
-            while (!stop) {
+
+
+
+            while (!isStop()) {
                 try {
                     //busy wait for incomming request from client
-                    while ((communication = requestQueue.take()) == null && !stop) {
+                    while ((communication = getIncommingRequest()) == null) {
                         ServerThread.sleep(100);
+                        if (isStop()) {
+                            break;
+                        }
                     }
-                    if (!stop) {
+                    if (!isStop()) {
                         //process incomming request
                         switch (communication.getReason()) {
                             case Exit:
                                 Log.debug("Incomming Exit request");
-                                shutdown();
+                                shutdown();                                
                                 break;
                             case ChallengeNumber:
+                                Log.debug("Incomming Challenge Number");
                                 break;
                             case ChallengeAnswer:
+                                Log.debug("Incomming Challenge Answer");
                                 break;
                             case Password:
+                                Log.debug("Incomming Password");
                                 break;
                             default:
                                 break;
@@ -110,7 +101,28 @@ public class Client extends ArchitectureThread {
                 }
             }
         }
-        this.shutdown();
+
         Log.info("Client shuting Down...");
+        try {
+            if (inThread != null) {
+                inThread.shutdown();
+                while (!inThread.isStopped()) {
+                    sleep(100);
+                }
+            }
+            if (outThread != null) {
+                outThread.shutdown();
+                while (!outThread.isStopped()) {
+                    sleep(100);
+                }
+            }
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException ex) {
+            Log.error("Problem stoping ServerThread - " + ex.getMessage());
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

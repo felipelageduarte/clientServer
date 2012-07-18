@@ -78,13 +78,13 @@ public class Log {
         lm.addLogger(logger);
     }
 
-    private String callMeAnyTime() {
+    private static String callMeAnyTime() {
         String answer = "";
         try {
-            throw new Exception("Who called me?");
+            throw new Exception("");
         } catch (Exception e) {
-            answer = e.getStackTrace()[4].getClassName() + "."
-                    + e.getStackTrace()[4].getMethodName();
+            answer = e.getStackTrace()[2].getClassName() + "."
+                    + e.getStackTrace()[2].getMethodName();
         }
         return answer;
     }
@@ -98,70 +98,70 @@ public class Log {
 
     public static void debug(String message) {
         try {
-            Log.getInstance().logger.log(Level.parse("DEBUG"), message);
+            Log.getInstance().logger.log(Level.parse("DEBUG"), callMeAnyTime() + " - " + message);
         } catch (IOException ex) {
         }
     }
 
     public static void debug(String message, Exception e) {
         try {
-            Log.getInstance().logger.log(Level.parse("DEBUG"), message + " - " + e.getMessage());
+            Log.getInstance().logger.log(Level.parse("DEBUG"), callMeAnyTime() + " - " + message + " - " + e.getMessage());
         } catch (IOException ex) {
         }
     }
 
     public static void info(String message) {
         try {
-            Log.getInstance().logger.log(Level.parse("INFO"), message);
+            Log.getInstance().logger.log(Level.parse("INFO"), callMeAnyTime() + " - " + message);
         } catch (IOException ex) {
         }
     }
 
     public static void info(String message, Exception e) {
         try {
-            Log.getInstance().logger.log(Level.parse("INFO"), message + " - " + e.getMessage());
+            Log.getInstance().logger.log(Level.parse("INFO"), callMeAnyTime() + " - " + message + " - " + e.getMessage());
         } catch (IOException ex) {
         }
     }
 
     public static void warn(String message) {
         try {
-            Log.getInstance().logger.log(Level.parse("WARN"), message);
+            Log.getInstance().logger.log(Level.parse("WARN"), callMeAnyTime() + " - " + message);
         } catch (IOException ex) {
         }
     }
 
     public static void warn(String message, Exception e) {
         try {
-            Log.getInstance().logger.log(Level.parse("WARN"), message + " - " + e.getMessage());
+            Log.getInstance().logger.log(Level.parse("WARN"), callMeAnyTime() + " - " + message + " - " + e.getMessage());
         } catch (IOException ex) {
         }
     }
 
     public static void error(String message) {
         try {
-            Log.getInstance().logger.log(Level.parse("ERROR"), message);
+            Log.getInstance().logger.log(Level.parse("ERROR"), callMeAnyTime() + " - " + message);
         } catch (IOException ex) {
         }
     }
 
     public static void error(String message, Exception e) {
         try {
-            Log.getInstance().logger.log(Level.parse("ERROR"), message + " - " + e.getMessage());
+            Log.getInstance().logger.log(Level.parse("ERROR"), callMeAnyTime() + " - " + message + " - " + e.getMessage());
         } catch (IOException ex) {
         }
     }
 
     public static void fatal(String message) {
         try {
-            Log.getInstance().logger.log(Level.parse("FATAL"), message);
+            Log.getInstance().logger.log(Level.parse("FATAL"), callMeAnyTime() + " - " + message);
         } catch (IOException ex) {
         }
     }
 
     public static void fatal(String message, Exception e) {
         try {
-            Log.getInstance().logger.log(Level.parse("FATAL"), message + " - " + e.getMessage());
+            Log.getInstance().logger.log(Level.parse("FATAL"), callMeAnyTime() + " - " + message + " - " + e.getMessage());
         } catch (IOException ex) {
         }
     }

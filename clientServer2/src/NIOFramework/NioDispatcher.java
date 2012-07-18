@@ -17,13 +17,14 @@
  * The use of the Apache License does not indicate that this project is
  * affiliated with the Apache Software Foundation.
  */
-package NIOServerFramework;
+package NIOFramework;
 
 import Log.Log;
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -119,6 +120,26 @@ public class NioDispatcher implements Dispatcher, Runnable {
         selector.wakeup();
     }
 
+
+    @Override
+    public ChannelFacade registerClientChannel(SocketChannel channel, InputHandler handler) throws IOException {
+        Log.debug("Connecting to Server...");
+        channel.configureBlocking(false);
+        
+        HandlerAdapter adapter = new HandlerAdapter(handler, this, bufferFactory);
+        adapter.registering();
+        acquireSelectorGuard();
+
+        try {
+            SelectionKey key = channel.register(selector, SelectionKey.OP_CONNECT, adapter);
+            adapter.setKey(key);
+            adapter.registered();
+
+            return adapter;
+        } finally {
+            releaseSelectorGuard();
+        }
+    }
     @Override
     public ChannelFacade registerChannel(SelectableChannel channel, InputHandler handler) throws IOException {
         Log.debug("New Client. Registering communication Channel");

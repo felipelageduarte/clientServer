@@ -1,19 +1,28 @@
 package network;
 
-import java.util.concurrent.SynchronousQueue;
+import Log.Log;
+import java.util.LinkedList;
 
 public class ArchitectureThread extends Thread {
 
-    protected SynchronousQueue<Communication> requestQueue;
+    private LinkedList<Communication> requestQueue;
     protected InThread inThread;
     protected OutThread outThread;
 
     public ArchitectureThread() {
-        requestQueue = new SynchronousQueue<Communication>();
+        requestQueue = new LinkedList<Communication>();
     }
 
     public void addRequest(Communication request) {
-        requestQueue.offer(request);
+        synchronized (requestQueue) {
+            requestQueue.addLast(request);
+        }
+    }
+
+    public Communication getIncommingRequest() throws InterruptedException {
+        synchronized (requestQueue) {
+            return requestQueue.pollFirst();
+        }
     }
 
     void addRequest(Object request) {
@@ -27,5 +36,4 @@ public class ArchitectureThread extends Thread {
     public OutThread getOutThread() {
         return outThread;
     }
-
 }

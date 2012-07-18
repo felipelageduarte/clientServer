@@ -11,13 +11,13 @@ public class LogFormatter extends Formatter {
     public String format(LogRecord rec) {
         StringBuilder buf = new StringBuilder(1000);
         buf.append(rec.getLevel());
-        buf.append("   ");
+        buf.setLength(8);
         buf.append(calcDate(rec.getMillis()));
-        buf.append("   ");
+        buf.setLength(27);
         buf.append(rec.getThreadID());
         buf.append(":");
-        buf.append(rec.getLoggerName());
-        buf.append("   ");
+        //buf.append(rec.getLoggerName());
+        //buf.append("   ");
         buf.append(formatMessage(rec));
         buf.append("\n");
         return buf.toString();

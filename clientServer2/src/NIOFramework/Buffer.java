@@ -1,7 +1,7 @@
-package Server;
+package NIOFramework;
 
 import Log.Log;
-import NIOServerFramework.BufferFactory;
+import NIOFramework.BufferFactory;
 import java.nio.ByteBuffer;
 
 public class Buffer implements BufferFactory {

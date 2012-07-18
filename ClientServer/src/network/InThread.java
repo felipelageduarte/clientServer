@@ -8,7 +8,7 @@ public class InThread extends Thread {
 
     private ObjectInputStream in;
     private ArchitectureThread architectureThread;
-    private boolean stop;
+    private Boolean stop;
     private boolean stopped;
 
     public InThread(ArchitectureThread architectureThread, ObjectInputStream in) {
@@ -20,15 +20,16 @@ public class InThread extends Thread {
     public boolean isStopped() {
         return stopped;
     }
+    
+    private Boolean isStop() {
+        synchronized (stop) {
+            return stop;
+        }
+    }
 
     public void shutdown() {
-        stop = true;
-        if (in != null) {
-            try {
-                in.close();
-            } catch (IOException ex) {
-                Log.error("Could not close InThread InputStream", ex);
-            }
+        synchronized (stop) {
+            stop = true;
         }
     }
 
@@ -36,18 +37,28 @@ public class InThread extends Thread {
     public void run() {
         this.stopped = false;
         Log.info("InThread running...");
-        while (!stop) {
+        Communication request;
+        while (!isStop()) {
             try {
-                architectureThread.addRequest(in.readObject());
+                request = (Communication) in.readObject();
+                architectureThread.addRequest(request);
             } catch (IOException ex) {
-                stop = true;
-                continue;
+                shutdown();
             } catch (ClassNotFoundException ex) {
                 Log.error("Class not Found exception", ex);
             }
         }
+        
         Log.info("InThread shuting down...");
-        this.shutdown();
+        if (in != null) {
+            try {
+                Log.debug("Closing in socket;");
+                in.close();
+                Log.debug("Closed in socket;");
+            } catch (IOException ex) {
+                Log.error("Could not close InThread InputStream", ex);
+            }
+        }
         this.stopped = true;
     }
 }

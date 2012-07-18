@@ -17,23 +17,27 @@
  * The use of the Apache License does not indicate that this project is
  * affiliated with the Apache Software Foundation.
  */
-package NIOServerFramework;
+package NIOFramework;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ByteChannel;
 
 /**
  * Created by IntelliJ IDEA. 
  * User: ron 
- * Date: Apr 6, 2006 
- * Time: 12:11:09 PM
+ * Date: Apr 5, 2006 
+ * Time: 4:20:04 PM
  */
-public interface ChannelFacade {
+public interface InputQueue {
 
-    InputQueue inputQueue();
+    int fillFrom(ByteChannel channel) throws IOException;
 
-    OutputQueue outputQueue();
+    boolean isEmpty();
 
-    void setHandler(InputHandler handler);
+    int indexOf(byte b);
 
-    int getInterestOps();
+    ByteBuffer dequeueBytes(int count);
 
-    void modifyInterestOps(int opsToSet, int opsToReset);
+    void discardBytes(int count);
 }

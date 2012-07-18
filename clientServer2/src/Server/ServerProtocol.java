@@ -1,9 +1,9 @@
 package Server;
 
 import Log.Log;
-import NIOServerFramework.ChannelFacade;
-import NIOServerFramework.InputHandler;
-import NIOServerFramework.InputHandlerFactory;
+import NIOFramework.ChannelFacade;
+import NIOFramework.InputHandler;
+import NIOFramework.InputHandlerFactory;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,11 +19,11 @@ import java.util.Map;
  * email: felipelageduarte at gmail dot com 
  * Date: Jul 12, 2012
  */
-public class Protocol implements InputHandlerFactory {
+public class ServerProtocol implements InputHandlerFactory {
 
     Map<ChannelFacade, User> users;
 
-    public Protocol() {
+    public ServerProtocol() {
         this.users = Collections.synchronizedMap(new HashMap<ChannelFacade, User>());
     }
 
@@ -31,7 +31,7 @@ public class Protocol implements InputHandlerFactory {
     // Implementation of InputHandlerFactory interface
     @Override
     public InputHandler newHandler() throws IllegalAccessException, InstantiationException {
-        return new Handler(this);
+        return new ServerHandler(this);
     }
 
     // --------------------------------------------------

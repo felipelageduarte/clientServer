@@ -1,48 +1,67 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package Client;
 
 import Log.Log;
+import NIOFramework.*;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
-/**
- *
- * @author felipelageduarte
- */
 public class Client {
 
+    private Executor executor;
+    private BufferFactory bufFactory;
+    private NioDispatcher dispatcher;
+    private InputHandlerFactory factory;
+    private StandardConnector connector;
     private static int instanceCount = 0;
-    private NioClient client;
 
     public Client() {
     }
 
     public boolean start(String address, int port) {
+
+        executor = Executors.newCachedThreadPool();
+        bufFactory = new Buffer(1024);
         try {
-            NioClient client = new NioClient(InetAddress.getByName(address), 80);
-            Thread t = new Thread(client);
-            t.setDaemon(true);
-            t.start();
-            RspHandler handler = new RspHandler();
-            client.send("GET / HTTP/1.0\r\n\r\n".getBytes(), handler);
-            handler.waitForResponse();
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
+            dispatcher = new NioDispatcher(executor, bufFactory);
         } catch (IOException ex) {
-            Log.fatal("Server couldn't start", ex);
+            Log.fatal("Client couldn't start", ex);
             return false;
         }
+        factory = (InputHandlerFactory) new ClientProtocol();
+
+        try {
+            connector = new StandardConnector(dispatcher, factory);
+            if (instanceCount == 0) {
+                connector.connect(address, port);
+                dispatcher.start();
+                Log.info("Client Started...");
+                instanceCount++;
+            } else {
+                Log.error("Client is alredy running...");
+            }
+        } catch (IOException ex) {
+            Log.fatal("Client couldn't start", ex);
+            dispatcher.shutdown();
+            return false;
+        }
+
         return true;
     }
 
     public void shutdown() {
-        //lient.
+        if (instanceCount > 0) {
+            dispatcher.shutdown();
+            connector.shutdown();
+            Log.error("Client has shutdown...");
+            instanceCount--;
+        } else {
+            Log.error("There is no Client running...");
+        }
+    }
+
+    public boolean sendMessage(Object obj) {
+        
+        return true;
     }
 }
