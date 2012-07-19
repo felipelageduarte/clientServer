@@ -15,38 +15,35 @@ import javax.swing.JOptionPane;
 
 public class Server extends Thread {
 
-    protected int serverPort;
+    protected ServerConfiguration config;
     protected ServerSocket serverSocket = null;
     protected Socket clientSocket;
-    protected volatile boolean stop = false;
+    protected volatile Boolean stop = false;
     protected Thread runningThread = null;
     protected ArrayList<ServerThread> serverThread = null;
 
-    public Server(int port) {
-        this.serverPort = port;
+    public Server(ServerConfiguration config) {
+        this.config = config;
         this.serverThread = new ArrayList<ServerThread>();
     }
 
     public synchronized void shutdown() {
-        Log.info("Stoping main server thread...");
-        this.stop = true;
-        try {
-            this.serverSocket.close();
-            Log.info("Stoping connection threads...");
-            ServerThread stAux = null;
-            for (int i = 0; i < serverThread.size(); ++i) {
-                stAux = serverThread.get(i);
-                if (stAux != null) {
-                    stAux.shutdown();
-                }
+        synchronized (stop) {
+            Log.info("Stoping main server thread...");
+            this.stop = true;
+            try {
+                this.serverSocket.close();
+
+            } catch (IOException e) {
+                throw new RuntimeException("Error closing server", e);
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Error closing server", e);
         }
     }
 
     public synchronized boolean isStopped() {
-        return this.stop;
+        synchronized (stop) {
+            return this.stop;
+        }
     }
 
     @Override
@@ -59,21 +56,21 @@ public class Server extends Thread {
 
         //try to open server socket
         try {
-            this.serverSocket = new ServerSocket(this.serverPort);
+            this.serverSocket = new ServerSocket(this.config.getPort());
             Log.debug("server initiated on address: "
                     + InetAddress.getLocalHost().getHostAddress() + ":"
-                    + serverPort);
+                    + this.config.getPort());
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "Servidor não pode ser criado: " + ex.getMessage(), "Unknow Host", JOptionPane.WARNING_MESSAGE);
             Log.fatal("Could not create the server: " + ex.getMessage());
         }
 
-        while (!stop && serverSocket != null) {
+        while (!isStopped() && serverSocket != null) {
+            updateClientListInterface();
             clientSocket = null;
             try {
                 clientSocket = this.serverSocket.accept();
-                Log.debug("New Client - " + clientSocket.getInetAddress().toString() + ":" + clientSocket.getPort());
-                updateClientListInterface();
+                Log.debug("New Client - " + clientSocket.getInetAddress().toString() + ":" + clientSocket.getPort());                
             } catch (IOException e) {
                 if (isStopped()) {
                     continue;
@@ -84,7 +81,7 @@ public class Server extends Thread {
             ServerThread sT = null;
             try {
                 Log.debug("Starting ServerThread to handle new Client...");
-                sT = new ServerThread(clientSocket, serverThread.size());
+                sT = new ServerThread(clientSocket, serverThread.size(), config);
                 sT.start();
                 serverThread.add(sT);
             } catch (IOException ex) {
@@ -102,6 +99,16 @@ public class Server extends Thread {
                 }
             }
         }
+
+        Log.info("Stoping connection threads...");
+        ServerThread stAux = null;
+        for (int i = 0; i < serverThread.size(); ++i) {
+            stAux = serverThread.get(i);
+            if (stAux != null) {
+                stAux.shutdown();
+            }
+        }
+
         Interface.getInstance().serverStoped();
         Log.info("Server Stopped.");
     }

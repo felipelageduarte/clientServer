@@ -10,17 +10,17 @@ public class LogFormatter extends Formatter {
     @Override
     public String format(LogRecord rec) {
         StringBuilder buf = new StringBuilder(1000);
-        buf.append(rec.getLevel());
-        buf.setLength(8);
-        buf.append(calcDate(rec.getMillis()));
-        buf.setLength(27);
+        buf.append(rightPad(rec.getLevel().getName() ,  7));
+        buf.append(rightPad(calcDate(rec.getMillis()), 19));
         buf.append(rec.getThreadID());
         buf.append(":");
-        //buf.append(rec.getLoggerName());
-        //buf.append("   ");
         buf.append(formatMessage(rec));
         buf.append("\n");
         return buf.toString();
+    }
+    
+    private static String rightPad(String s, int width) {
+        return String.format("%-" + width + "s", s);
     }
 
     private String calcDate(long millisecs) {

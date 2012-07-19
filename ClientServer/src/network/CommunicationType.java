@@ -12,5 +12,9 @@ public enum CommunicationType {
     Exit,
     ChallengeNumber,
     ChallengeAnswer,
-    Password,    
+    ConnectionAccept,
+    ConnectionNotAccept,
+    PasswordRequired,    
+    Password, 
+    WrongPassword,    
 }

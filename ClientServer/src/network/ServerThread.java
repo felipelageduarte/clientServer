@@ -19,12 +19,15 @@ public class ServerThread extends ArchitectureThread {
     private Boolean stop;
     private ObjectInputStream in;
     private ObjectOutputStream out;
+    private Double challengeNumber;
+    private ServerConfiguration config;
 
-    ServerThread(Socket clientSocket, int index) throws IOException {
+    ServerThread(Socket clientSocket, int index, ServerConfiguration config) throws IOException {
         super();
         this.clientSocket = clientSocket;
         this.index = index;
-        stop = false;
+        this.stop = false;
+        this.config = config;
     }
 
     public int getIndex() {
@@ -64,6 +67,10 @@ public class ServerThread extends ArchitectureThread {
             stop = true;
         }
 
+        challengeNumber = ConnectionChallenge.getNumber();
+        Log.debug("Sending Challenge number: " + challengeNumber);
+        outThread.addRequest(CommunicationType.ChallengeNumber, challengeNumber);
+
         while (!isStop()) {
             try {
                 //busy wait for incomming request from client
@@ -80,21 +87,22 @@ public class ServerThread extends ArchitectureThread {
                             Log.debug("Incomming Exit request");
                             shutdown();
                             break;
-                        case ChallengeNumber:
-                            Log.debug("Incomming Challenge Number");
-                            break;
                         case ChallengeAnswer:
-                            Log.debug("Incomming Challenge Answer");
+                            ChallengeAnswer(communication);
                             break;
                         case Password:
                             Log.debug("Incomming Password");
+                            password(communication);
                             break;
                         default:
+                            Log.warn("Incoming unexpected message: " + communication.getReason().toString());
                             break;
                     }
                 }
             } catch (InterruptedException ex) {
-                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+                Log.warn("Interrupted Exception", ex);
+            } catch (ClassCastException ex) {
+                Log.warn("Problem on interpret Object of the incoming message", ex);
             }
         }
         try {
@@ -119,5 +127,48 @@ public class ServerThread extends ArchitectureThread {
             Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
         }
         Log.info("ServerThread shuting down...");
+    }
+
+    private void ChallengeAnswer(Communication communication) {
+        try {
+            Double challengeAnswer = (Double) communication.getObj();
+            Log.debug("Incomming Challenge Answer: " + challengeAnswer);
+            if (Math.abs(challengeAnswer - ConnectionChallenge.calc(challengeNumber)) <= Math.pow(10, -5)) {
+                if (config.isPasswordRequired()) {
+                    Log.debug("Password Required");
+                    outThread.addRequest(CommunicationType.PasswordRequired, null);
+                } else {
+                    Log.debug("Conection accept");
+                    outThread.addRequest(CommunicationType.ConnectionAccept, null);
+                }
+            } else {
+                Log.fatal("Connection not accept");
+                outThread.addRequest(CommunicationType.ConnectionNotAccept, null);
+                shutdown();
+            }
+        } catch (ClassCastException ex) {
+            Log.warn("Problem on interpret Object of the incoming message", ex);
+            outThread.addRequest(CommunicationType.ConnectionNotAccept, null);
+            shutdown();
+        }
+    }
+
+    private void password(Communication communication) {
+        try {
+            String password = (String) communication.getObj();
+            Log.debug("Incomming Password Answer: " + password);
+            if (password.equals(config.getPassword())) {
+                Log.debug("Conection accept");
+                outThread.addRequest(CommunicationType.ConnectionAccept, null);
+            } else {
+                Log.fatal("Wrong Password");
+                outThread.addRequest(CommunicationType.WrongPassword, null);
+                shutdown();
+            }
+        } catch (ClassCastException ex) {
+            Log.warn("Problem on interpret Object of the incoming message", ex);
+            outThread.addRequest(CommunicationType.ConnectionNotAccept, null);
+            shutdown();
+        }
     }
 }

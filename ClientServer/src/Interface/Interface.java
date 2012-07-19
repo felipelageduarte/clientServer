@@ -1,10 +1,12 @@
 package Interface;
 
-import network.Client;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import javax.swing.JTextArea;
+import network.Client;
+import network.ClientConfiguration;
 import network.Server;
+import network.ServerConfiguration;
 
 public class Interface extends javax.swing.JFrame {
 
@@ -48,7 +50,6 @@ public class Interface extends javax.swing.JFrame {
     }
 
     private void enableClientIntreface(boolean enable) {
-        this.clientCancelButton.setEnabled(enable);
         this.clientConnectButton.setEnabled(enable);
         this.clientDisconnectButton.setEnabled(enable);
         this.clientIPTextField.setEnabled(enable);
@@ -56,11 +57,12 @@ public class Interface extends javax.swing.JFrame {
     }
 
     private void enableServerIntreface(boolean enable) {
-        this.serverCancelButton.setEnabled(enable);
         this.serverConnectButton.setEnabled(enable);
         this.serverDisconnectButton.setEnabled(enable);
-        this.serverIPTextField.setEnabled(enable);
+        this.serverIPTextField.setEditable(enable);
         this.serverPortSpinner.setEnabled(enable);
+        this.serverPasswordField.setEditable(enable);
+        this.serverPasswordCheckBox.setEnabled(enable);
     }
 
     public void serverStoped() {
@@ -73,6 +75,85 @@ public class Interface extends javax.swing.JFrame {
             this.enableClientIntreface(true);
         }
     }
+
+    public void clientStoped() {
+        if (Conectado) {
+            clientDisconnectButton.setEnabled(false);
+            clientConnectButton.setEnabled(true);
+            Conectado = false;
+            clientStatusLabel.setText("Disconectado");
+            clientStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
+            this.enableServerIntreface(true);
+        }
+    }
+
+    private void serverConnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverConnectButtonActionPerformed
+        if (!Conectado) {
+            Conectado = true;
+            this.enableClientIntreface(false);
+            this.enableServerIntreface(false);
+            serverDisconnectButton.setEnabled(true);
+            serverConnectButton.setEnabled(false);
+            serverStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
+            serverStatusLabel.setText("No Ar");
+            ServerConfiguration config = new ServerConfiguration((Integer) this.serverPortSpinner.getValue());
+            config.setEnableClientEdition(serverClientEditCheckBox.isSelected());
+            if (serverPasswordCheckBox.isSelected()) {
+                config.setPassword(serverPasswordField.getText());
+            }
+            server = new Server(config);
+            server.start();
+        }
+    }//GEN-LAST:event_serverConnectButtonActionPerformed
+
+    private void serverDisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverDisconnectButtonActionPerformed
+        if (Conectado) {
+            this.enableClientIntreface(true);
+            this.enableServerIntreface(true);
+            serverDisconnectButton.setEnabled(false);
+            serverConnectButton.setEnabled(true);
+            serverStatusLabel.setText("Fora do Ar");
+            serverStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
+            Conectado = false;
+            server.shutdown();
+        }
+    }//GEN-LAST:event_serverDisconnectButtonActionPerformed
+
+    private void serverCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverCancelButtonActionPerformed
+        //this.setVisible(false);
+    }//GEN-LAST:event_serverCancelButtonActionPerformed
+
+    private void clientConnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientConnectButtonActionPerformed
+        if (!Conectado) {
+            this.enableServerIntreface(false);
+            Conectado = true;
+            clientDisconnectButton.setEnabled(true);
+            clientConnectButton.setEnabled(false);
+            clientStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
+            clientStatusLabel.setText("Conectado");
+            ClientConfiguration config = new ClientConfiguration(clientPasswordField.getText(),
+                    clientIPTextField.getText(),
+                    (Integer) clientPortSpinner.getValue());
+            client = new Client(config);
+            client.start();
+        }
+    }//GEN-LAST:event_clientConnectButtonActionPerformed
+
+    private void clientDisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientDisconnectButtonActionPerformed
+        if (Conectado) {
+            clientDisconnectButton.setEnabled(false);
+            clientConnectButton.setEnabled(true);
+            clientStatusLabel.setText("Disconectado");
+            clientStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
+            this.enableServerIntreface(true);
+            Conectado = false;
+            client.shutdown();
+        }
+    }//GEN-LAST:event_clientDisconnectButtonActionPerformed
+
+    private void clientCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientCancelButtonActionPerformed
+        //this.setVisible(false);
+    }//GEN-LAST:event_clientCancelButtonActionPerformed
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -128,11 +209,6 @@ public class Interface extends javax.swing.JFrame {
         serverIPTextField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         serverIPTextField.setText("127.0.0.1");
         serverIPTextField.setName("serverIPTextField"); // NOI18N
-        serverIPTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                serverIPTextFieldActionPerformed(evt);
-            }
-        });
 
         serverPortSpinner.setModel(new javax.swing.SpinnerNumberModel(8080, 1050, 9999, 1));
         serverPortSpinner.setName("serverPortSpinner"); // NOI18N
@@ -188,6 +264,11 @@ public class Interface extends javax.swing.JFrame {
         serverPasswordLabel.setName("serverPasswordLabel");
 
         serverPasswordField.setName("serverPasswordField");
+        serverPasswordField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                serverPasswordFieldKeyReleased(evt);
+            }
+        });
 
         serverPasswordCheckBox.setText("Habilitar");
         serverPasswordCheckBox.setName("serverPasswordCheckBox");
@@ -268,11 +349,6 @@ public class Interface extends javax.swing.JFrame {
         clientIPTextField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         clientIPTextField.setText("127.0.0.1");
         clientIPTextField.setName("clientIPTextField");
-        clientIPTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clientIPTextFieldActionPerformed(evt);
-            }
-        });
 
         clientPortLabel.setText("Porta :");
         clientPortLabel.setName("clientPortLabel");
@@ -403,70 +479,13 @@ public class Interface extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void serverIPTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverIPTextFieldActionPerformed
-    }//GEN-LAST:event_serverIPTextFieldActionPerformed
-
-    private void serverDisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverDisconnectButtonActionPerformed
-        if (Conectado) {
-            serverDisconnectButton.setEnabled(false);
-            serverConnectButton.setEnabled(true);
-            Conectado = false;
-            server.shutdown();
-            serverStatusLabel.setText("Fora do Ar");
-            serverStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
-            this.enableClientIntreface(true);
+    private void serverPasswordFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_serverPasswordFieldKeyReleased
+        if (serverPasswordField.getText().isEmpty()) {
+            serverPasswordCheckBox.setSelected(false);
+        } else {
+            serverPasswordCheckBox.setSelected(true);
         }
-    }//GEN-LAST:event_serverDisconnectButtonActionPerformed
-
-    private void serverCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverCancelButtonActionPerformed
-    }//GEN-LAST:event_serverCancelButtonActionPerformed
-
-    private void serverConnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverConnectButtonActionPerformed
-        if (!Conectado) {
-            Conectado = true;
-            this.enableClientIntreface(false);
-            serverDisconnectButton.setEnabled(true);
-            serverConnectButton.setEnabled(false);
-            serverStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
-            serverStatusLabel.setText("No Ar");
-            server = new Server((Integer) this.serverPortSpinner.getValue());
-            server.start();
-        }
-    }//GEN-LAST:event_serverConnectButtonActionPerformed
-
-    private void clientIPTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientIPTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_clientIPTextFieldActionPerformed
-
-    private void clientConnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientConnectButtonActionPerformed
-        if (!Conectado) {
-            Conectado = true;
-            clientDisconnectButton.setEnabled(true);
-            clientConnectButton.setEnabled(false);
-            clientStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
-            clientStatusLabel.setText("Conectado");
-            client = new Client(clientIPTextField.getText(),
-                    (Integer) clientPortSpinner.getValue());
-            client.start();
-            this.enableServerIntreface(false);
-        }
-    }//GEN-LAST:event_clientConnectButtonActionPerformed
-
-    private void clientDisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientDisconnectButtonActionPerformed
-        if (Conectado) {
-            clientDisconnectButton.setEnabled(false);
-            clientConnectButton.setEnabled(true);
-            Conectado = false;
-            client.shutdown();
-            clientStatusLabel.setText("Disconectado");
-            clientStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
-            this.enableServerIntreface(true);
-        }
-    }//GEN-LAST:event_clientDisconnectButtonActionPerformed
-
-    private void clientCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientCancelButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_clientCancelButtonActionPerformed
+    }//GEN-LAST:event_serverPasswordFieldKeyReleased
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane applicationTabbedPane;
     private javax.swing.JButton clientCancelButton;
