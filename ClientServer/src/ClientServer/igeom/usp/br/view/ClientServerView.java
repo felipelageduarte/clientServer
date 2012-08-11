@@ -1,44 +1,92 @@
-package Interface;
+package ClientServer.igeom.usp.br.view;
 
+import ClientServer.igeom.usp.br.core.ClientConfiguration;
+import ClientServer.igeom.usp.br.core.ServerConfiguration;
+import ClientServer.igeom.usp.br.network.ClientServer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import javax.swing.JTextArea;
-import network.Client;
-import network.ClientConfiguration;
-import network.Server;
-import network.ServerConfiguration;
 
-public class Interface extends javax.swing.JFrame {
+public class ClientServerView extends javax.swing.JFrame {
 
-    private static Interface SINGLETON = null;
     protected int Port = 4000;
-    protected Server server = null;
-    protected Client client = null;
-    protected boolean Conectado;
+    protected boolean conectado;
+    private ClientServer clientServer;
 
-    private Interface() {
+    public ClientServerView(ClientServer clientServer) {
         initComponents();
-        serverDisconnectButton.setEnabled(false);
-        serverConnectButton.setEnabled(true);
-        clientDisconnectButton.setEnabled(false);
-        clientConnectButton.setEnabled(true);
-        Conectado = false;
         serverIPTextField.setText(localhost());
-    }
+        this.clientServer = clientServer;
 
-    public static Interface getInstance() {
-        if (SINGLETON == null) {
-            SINGLETON = new Interface();
+        clientStopped();
+        serverStopped();
+
+        if (clientServer.getClient() != null && !clientServer.getClient().isStopped()) {
+            clientRunning();
         }
-        return SINGLETON;
+        if (clientServer.getServer() != null && !clientServer.getServer().isStopped()) {
+            serverRunning();
+        }
+
     }
 
-    public JTextArea getServerClientListTextArea() {
-        return serverClientListTextArea;
+    public void enableClientIntreface(boolean enable) {
+        this.clientConnectButton.setEnabled(enable);
+        this.clientDisconnectButton.setEnabled(enable);
+        this.clientIPTextField.setEnabled(enable);
+        this.clientPortSpinner.setEnabled(enable);
+        this.clientNickNameTextField.setEnabled(enable);
+        this.clientPasswordField.setEnabled(enable);
     }
 
-    public void setServerClientListTextArea(JTextArea serverClientListTextArea) {
-        this.serverClientListTextArea = serverClientListTextArea;
+    public void enableServerIntreface(boolean enable) {
+        this.serverConnectButton.setEnabled(enable);
+        this.serverDisconnectButton.setEnabled(enable);
+        this.serverIPTextField.setEditable(enable);
+        this.serverPortSpinner.setEnabled(enable);
+        this.serverPasswordField.setEditable(enable);
+        this.serverPasswordCheckBox.setEnabled(enable);
+    }
+
+    public void clientStopped() {
+        enableClientIntreface(true);
+        enableServerIntreface(true);
+
+        this.clientDisconnectButton.setEnabled(false);
+        this.serverDisconnectButton.setEnabled(false);
+        this.conectado = false;
+        this.clientStatusLabel.setText("Disconectado");
+        this.clientStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
+    }
+
+    public void clientRunning() {
+        enableClientIntreface(false);
+        enableServerIntreface(false);
+
+        this.conectado = true;
+        this.clientDisconnectButton.setEnabled(true);
+        this.clientStatusLabel.setForeground(new java.awt.Color(255, 255, 0));
+        this.clientStatusLabel.setText("Conectando...");
+    }
+
+    public void serverStopped() {
+        enableClientIntreface(true);
+        enableServerIntreface(true);
+
+        this.clientDisconnectButton.setEnabled(false);
+        this.serverDisconnectButton.setEnabled(false);
+        this.conectado = false;
+        this.serverStatusLabel.setText("Fora do Ar");
+        this.serverStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
+    }
+
+    public void serverRunning() {
+        enableClientIntreface(false);
+        enableServerIntreface(false);
+
+        this.conectado = true;
+        this.serverDisconnectButton.setEnabled(true);
+        this.serverStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
+        this.serverStatusLabel.setText("No Ar");
     }
 
     private String localhost() {
@@ -49,110 +97,67 @@ public class Interface extends javax.swing.JFrame {
         }
     }
 
-    private void enableClientIntreface(boolean enable) {
-        this.clientConnectButton.setEnabled(enable);
-        this.clientDisconnectButton.setEnabled(enable);
-        this.clientIPTextField.setEnabled(enable);
-        this.clientPortSpinner.setEnabled(enable);
+    public void clientConected() {
+        this.clientStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
+        this.clientStatusLabel.setText("Conectado");
     }
 
-    private void enableServerIntreface(boolean enable) {
-        this.serverConnectButton.setEnabled(enable);
-        this.serverDisconnectButton.setEnabled(enable);
-        this.serverIPTextField.setEditable(enable);
-        this.serverPortSpinner.setEnabled(enable);
-        this.serverPasswordField.setEditable(enable);
-        this.serverPasswordCheckBox.setEnabled(enable);
+    public void updateClientListInterface(String list) {       
+        serverClientListTextArea.setText(list);
     }
 
-    public void serverStoped() {
-        if (Conectado) {
-            serverDisconnectButton.setEnabled(false);
-            serverConnectButton.setEnabled(true);
-            Conectado = false;
-            serverStatusLabel.setText("Fora do Ar");
-            serverStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
-            this.enableClientIntreface(true);
-        }
-    }
-
-    public void clientStoped() {
-        if (Conectado) {
-            clientDisconnectButton.setEnabled(false);
-            clientConnectButton.setEnabled(true);
-            Conectado = false;
-            clientStatusLabel.setText("Disconectado");
-            clientStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
-            this.enableServerIntreface(true);
-        }
+    private void Fechar() {
+        /**
+        this.setVisible(false);
+        /*/
+        System.exit(0);
+        /**/
     }
 
     private void serverConnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverConnectButtonActionPerformed
-        if (!Conectado) {
-            Conectado = true;
-            this.enableClientIntreface(false);
-            this.enableServerIntreface(false);
-            serverDisconnectButton.setEnabled(true);
-            serverConnectButton.setEnabled(false);
-            serverStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
-            serverStatusLabel.setText("No Ar");
+        if (!conectado) {
+            serverRunning();
             ServerConfiguration config = new ServerConfiguration((Integer) this.serverPortSpinner.getValue());
             config.setEnableClientEdition(serverClientEditCheckBox.isSelected());
             if (serverPasswordCheckBox.isSelected()) {
                 config.setPassword(serverPasswordField.getText());
             }
-            server = new Server(config);
-            server.start();
+            config.setConfirmConnection(serverConfirmConectionCheckBox.isSelected());
+            clientServer.newServer(config);                       
         }
     }//GEN-LAST:event_serverConnectButtonActionPerformed
 
     private void serverDisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverDisconnectButtonActionPerformed
-        if (Conectado) {
-            this.enableClientIntreface(true);
-            this.enableServerIntreface(true);
-            serverDisconnectButton.setEnabled(false);
-            serverConnectButton.setEnabled(true);
-            serverStatusLabel.setText("Fora do Ar");
-            serverStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
-            Conectado = false;
-            server.shutdown();
+        if (conectado) {
+            clientServer.shutdownServer();
+            serverStopped();
         }
     }//GEN-LAST:event_serverDisconnectButtonActionPerformed
 
     private void serverCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverCancelButtonActionPerformed
-        //this.setVisible(false);
+        Fechar();
     }//GEN-LAST:event_serverCancelButtonActionPerformed
 
     private void clientConnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientConnectButtonActionPerformed
-        if (!Conectado) {
-            this.enableServerIntreface(false);
-            Conectado = true;
-            clientDisconnectButton.setEnabled(true);
-            clientConnectButton.setEnabled(false);
-            clientStatusLabel.setForeground(new java.awt.Color(0, 255, 0));
-            clientStatusLabel.setText("Conectado");
+        if (!conectado) {
+            clientRunning();
             ClientConfiguration config = new ClientConfiguration(clientPasswordField.getText(),
+                    clientNickNameTextField.getText().trim(),
                     clientIPTextField.getText(),
                     (Integer) clientPortSpinner.getValue());
-            client = new Client(config);
-            client.start();
+            clientServer.newClient(config);
         }
     }//GEN-LAST:event_clientConnectButtonActionPerformed
 
     private void clientDisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientDisconnectButtonActionPerformed
-        if (Conectado) {
-            clientDisconnectButton.setEnabled(false);
-            clientConnectButton.setEnabled(true);
-            clientStatusLabel.setText("Disconectado");
-            clientStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
-            this.enableServerIntreface(true);
-            Conectado = false;
-            client.shutdown();
+        if (conectado) {
+            clientServer.shutdownClient();
+            clientStopped();
         }
     }//GEN-LAST:event_clientDisconnectButtonActionPerformed
 
     private void clientCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientCancelButtonActionPerformed
-        //this.setVisible(false);
+        Fechar();
     }//GEN-LAST:event_clientCancelButtonActionPerformed
 
     @SuppressWarnings("unchecked")
@@ -175,6 +180,7 @@ public class Interface extends javax.swing.JFrame {
         serverPasswordField = new javax.swing.JPasswordField();
         serverPasswordCheckBox = new javax.swing.JCheckBox();
         serverClientEditCheckBox = new javax.swing.JCheckBox();
+        serverConfirmConectionCheckBox = new javax.swing.JCheckBox();
         clientPanel = new javax.swing.JPanel();
         clientIPLabel = new javax.swing.JLabel();
         clientIPTextField = new javax.swing.JTextField();
@@ -186,13 +192,17 @@ public class Interface extends javax.swing.JFrame {
         clientCancelButton = new javax.swing.JButton();
         clientPasswordLabel = new javax.swing.JLabel();
         clientPasswordField = new javax.swing.JPasswordField();
-        jMenuBar = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        jMenu2 = new javax.swing.JMenu();
+        clientNickNameLabel = new javax.swing.JLabel();
+        clientNickNameTextField = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Client Server Application");
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         applicationTabbedPane.setName("applicationTabbedPane");
 
@@ -273,8 +283,11 @@ public class Interface extends javax.swing.JFrame {
         serverPasswordCheckBox.setText("Habilitar");
         serverPasswordCheckBox.setName("serverPasswordCheckBox");
 
-        serverClientEditCheckBox.setText("Habilitar Edição do Cliente");
+        serverClientEditCheckBox.setText("Habilitar Edição");
         serverClientEditCheckBox.setName("serverClientEditCheckBox");
+
+        serverConfirmConectionCheckBox.setText("Confirmar a Conexão");
+        serverConfirmConectionCheckBox.setName("serverConfirmConectionCheckBox");
 
         javax.swing.GroupLayout serverPanelLayout = new javax.swing.GroupLayout(serverPanel);
         serverPanel.setLayout(serverPanelLayout);
@@ -307,7 +320,10 @@ public class Interface extends javax.swing.JFrame {
                                 .addComponent(serverDisconnectButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(serverCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(serverClientEditCheckBox))
+                            .addGroup(serverPanelLayout.createSequentialGroup()
+                                .addComponent(serverClientEditCheckBox)
+                                .addGap(18, 18, 18)
+                                .addComponent(serverConfirmConectionCheckBox)))
                         .addGap(0, 3, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -328,7 +344,9 @@ public class Interface extends javax.swing.JFrame {
                     .addComponent(serverPasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(serverPasswordCheckBox))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(serverClientEditCheckBox)
+                .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(serverClientEditCheckBox)
+                    .addComponent(serverConfirmConectionCheckBox))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(serverClientListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
@@ -397,6 +415,11 @@ public class Interface extends javax.swing.JFrame {
 
         clientPasswordField.setName("clientPasswordField");
 
+        clientNickNameLabel.setText("Apelido:");
+        clientNickNameLabel.setName("clientNickNameLabel");
+
+        clientNickNameTextField.setName("clientNickNameTextField");
+
         javax.swing.GroupLayout clientPanelLayout = new javax.swing.GroupLayout(clientPanel);
         clientPanel.setLayout(clientPanelLayout);
         clientPanelLayout.setHorizontalGroup(
@@ -407,11 +430,15 @@ public class Interface extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, clientPanelLayout.createSequentialGroup()
                         .addComponent(clientIPLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(clientIPTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
+                        .addComponent(clientIPTextField)
                         .addGap(18, 18, 18)
                         .addComponent(clientPortLabel)
                         .addGap(8, 8, 8)
                         .addComponent(clientPortSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(clientPanelLayout.createSequentialGroup()
+                        .addComponent(clientPasswordLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(clientPasswordField))
                     .addGroup(clientPanelLayout.createSequentialGroup()
                         .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(clientStatusLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -421,11 +448,11 @@ public class Interface extends javax.swing.JFrame {
                                 .addComponent(clientDisconnectButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(clientCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(0, 3, Short.MAX_VALUE))
                     .addGroup(clientPanelLayout.createSequentialGroup()
-                        .addComponent(clientPasswordLabel)
+                        .addComponent(clientNickNameLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(clientPasswordField, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE)))
+                        .addComponent(clientNickNameTextField)))
                 .addContainerGap())
         );
         clientPanelLayout.setVerticalGroup(
@@ -441,9 +468,13 @@ public class Interface extends javax.swing.JFrame {
                     .addComponent(clientPortSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(clientNickNameLabel)
+                    .addComponent(clientNickNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(clientPasswordLabel)
                     .addComponent(clientPasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 219, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 184, Short.MAX_VALUE)
                 .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(clientCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(clientDisconnectButton)
@@ -452,18 +483,6 @@ public class Interface extends javax.swing.JFrame {
         );
 
         applicationTabbedPane.addTab("Client", clientPanel);
-
-        jMenuBar.setName("jMenuBar");
-
-        jMenu1.setText("File");
-        jMenu1.setName("jMenu1");
-        jMenuBar.add(jMenu1);
-
-        jMenu2.setText("Edit");
-        jMenu2.setName("jMenu2");
-        jMenuBar.add(jMenu2);
-
-        setJMenuBar(jMenuBar);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -486,6 +505,10 @@ public class Interface extends javax.swing.JFrame {
             serverPasswordCheckBox.setSelected(true);
         }
     }//GEN-LAST:event_serverPasswordFieldKeyReleased
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        Fechar();
+    }//GEN-LAST:event_formWindowClosing
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane applicationTabbedPane;
     private javax.swing.JButton clientCancelButton;
@@ -493,19 +516,19 @@ public class Interface extends javax.swing.JFrame {
     private javax.swing.JButton clientDisconnectButton;
     private javax.swing.JLabel clientIPLabel;
     private javax.swing.JTextField clientIPTextField;
+    private javax.swing.JLabel clientNickNameLabel;
+    private javax.swing.JTextField clientNickNameTextField;
     private javax.swing.JPanel clientPanel;
     private javax.swing.JPasswordField clientPasswordField;
     private javax.swing.JLabel clientPasswordLabel;
     private javax.swing.JLabel clientPortLabel;
     private javax.swing.JSpinner clientPortSpinner;
     private javax.swing.JLabel clientStatusLabel;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JButton serverCancelButton;
     private javax.swing.JCheckBox serverClientEditCheckBox;
     private javax.swing.JScrollPane serverClientListScrollPane;
     private javax.swing.JTextArea serverClientListTextArea;
+    private javax.swing.JCheckBox serverConfirmConectionCheckBox;
     private javax.swing.JButton serverConnectButton;
     private javax.swing.JButton serverDisconnectButton;
     private javax.swing.JLabel serverIPLabel;
@@ -518,13 +541,4 @@ public class Interface extends javax.swing.JFrame {
     private javax.swing.JSpinner serverPortSpinner;
     private javax.swing.JLabel serverStatusLabel;
     // End of variables declaration//GEN-END:variables
-
-    public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
-                Interface.getInstance().setVisible(true);
-            }
-        });
-    }
 }

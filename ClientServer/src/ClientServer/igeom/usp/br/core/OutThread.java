@@ -1,6 +1,7 @@
-package network;
+package ClientServer.igeom.usp.br.core;
 
-import Log.Log;
+import ClientServer.igeom.usp.br.Log.Log;
+import ClientServer.igeom.usp.br.protocol.CommunicationType;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.LinkedList;
@@ -12,10 +13,10 @@ public class OutThread extends Thread {
     private ObjectOutputStream out;
     private Boolean stop;
     private boolean stopped;
-    protected LinkedList<Communication> sendQueue;
+    protected LinkedList<MessagePojo> sendQueue;
 
     public OutThread(ObjectOutputStream out) {
-        this.sendQueue = new LinkedList<Communication>();
+        this.sendQueue = new LinkedList<MessagePojo>();
         this.out = out;
         stop = false;
     }
@@ -38,11 +39,11 @@ public class OutThread extends Thread {
 
     public void addRequest(CommunicationType reason, Object request) {
         synchronized (sendQueue) {
-            sendQueue.offer(new Communication(reason, request));
+            sendQueue.offer(new MessagePojo(this, reason, request));
         }
     }
 
-    private Communication getIncommingRequest() throws InterruptedException {
+    private MessagePojo getIncommingRequest() throws InterruptedException {
         synchronized (sendQueue) {
             return sendQueue.pollFirst();
         }
@@ -58,7 +59,7 @@ public class OutThread extends Thread {
             try {
                 //busy wait for incomming request from client
                 while ((obj = getIncommingRequest()) == null) {
-                    ServerThread.sleep(100);
+                    Thread.sleep(100);
                     if (isStop()) {
                         break;
                     }
@@ -87,8 +88,6 @@ public class OutThread extends Thread {
                 Log.error("Out Thread coud not close Output Stream", ex);
             }
         }
-
-
 
         this.stopped = true;
     }

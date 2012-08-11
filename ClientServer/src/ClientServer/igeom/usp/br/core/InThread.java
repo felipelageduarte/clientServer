@@ -1,17 +1,17 @@
-package network;
+package ClientServer.igeom.usp.br.core;
 
-import Log.Log;
+import ClientServer.igeom.usp.br.Log.Log;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
 public class InThread extends Thread {
 
     private ObjectInputStream in;
-    private ArchitectureThread architectureThread;
+    private NetworkElement architectureThread;
     private Boolean stop;
     private boolean stopped;
 
-    public InThread(ArchitectureThread architectureThread, ObjectInputStream in) {
+    public InThread(NetworkElement architectureThread, ObjectInputStream in) {
         this.in = in;
         this.architectureThread = architectureThread;
         stop = false;
@@ -37,11 +37,11 @@ public class InThread extends Thread {
     public void run() {
         this.stopped = false;
         Log.info("InThread running...");
-        Communication request;
+        MessagePojo request;
         while (!isStop()) {
             try {
-                request = (Communication) in.readObject();
-                architectureThread.addRequest(request);
+                request = (MessagePojo) in.readObject();
+                architectureThread.addMessage(request);
             } catch (IOException ex) {
                 shutdown();
             } catch (ClassNotFoundException ex) {

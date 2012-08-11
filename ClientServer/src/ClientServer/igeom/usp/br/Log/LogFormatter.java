@@ -1,4 +1,4 @@
-package Log;
+package ClientServer.igeom.usp.br.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

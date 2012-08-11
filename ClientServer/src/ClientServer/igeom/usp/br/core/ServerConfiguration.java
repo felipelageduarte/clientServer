@@ -1,30 +1,34 @@
-package network;
+package ClientServer.igeom.usp.br.core;
 
-public class ServerConfiguration {
+public class ServerConfiguration{
 
     private Boolean passwordRequired;
     private String password;
     private Boolean enableClientEdition;
     private int port;
+    private Boolean confirmConnection;
 
     public ServerConfiguration(int port) {
         this.password = "";
         this.passwordRequired = false;
         this.enableClientEdition = false;
+        this.confirmConnection = false;
         this.port = port;
     }
 
-    public ServerConfiguration(String password, Boolean enableClientEdition, int port) {
+    public ServerConfiguration(Boolean passwordRequired, String password, Boolean enableClientEdition, int port, Boolean confirmConnection) {
+        this.passwordRequired = passwordRequired;
         this.password = password;
-        this.passwordRequired = true;
         this.enableClientEdition = enableClientEdition;
         this.port = port;
+        this.confirmConnection = confirmConnection;
     }
 
     public ServerConfiguration(String password, int port) {
         this.password = password;
         this.passwordRequired = true;
         this.enableClientEdition = false;
+        this.confirmConnection = false;
         this.port = port;
     }
 
@@ -59,5 +63,13 @@ public class ServerConfiguration {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public boolean isConfirmConnection() {
+        return confirmConnection;
+    }
+
+    public void setConfirmConnection(Boolean confirmConnection) {
+        this.confirmConnection = confirmConnection;
     }
 }

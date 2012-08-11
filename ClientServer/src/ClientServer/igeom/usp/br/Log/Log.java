@@ -1,4 +1,4 @@
-package Log;
+package ClientServer.igeom.usp.br.Log;
 
 import java.io.IOException;
 import java.util.logging.*;
@@ -48,19 +48,19 @@ public class Log {
             logger.addHandler(console);
         }
         if (logFile) {
-            fileTxt = new FileHandler("iGeom.log", append);
+            fileTxt = new FileHandler("ClientServerIGeom.log", append);
             fileTxt.setLevel(Level.ALL);
             fileTxt.setFormatter(new LogFormatter());
             logger.addHandler(fileTxt);
         }
         if (logHTML) {
-            fileHTML = new FileHandler("iGeom.html");
+            fileHTML = new FileHandler("ClientServerIGeom.html");
             fileHTML.setLevel(Level.ALL);
             fileHTML.setFormatter(new HtmlFormatter());
             logger.addHandler(fileHTML);
         }
         if (logXML) {
-            fileXML = new FileHandler("iGeom.xml");
+            fileXML = new FileHandler("ClientServerIGeom.xml");
             fileXML.setLevel(Level.ALL);
             fileXML.setFormatter(new XMLFormatter());
             logger.addHandler(fileXML);
@@ -83,7 +83,7 @@ public class Log {
         try {
             throw new Exception("");
         } catch (Exception e) {
-            answer = e.getStackTrace()[2].getClassName() + "."
+            answer = e.getStackTrace()[2].getClassName() + ":"
                     + e.getStackTrace()[2].getMethodName();
         }
         return answer;

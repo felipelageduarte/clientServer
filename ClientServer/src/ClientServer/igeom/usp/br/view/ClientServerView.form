@@ -1,36 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.5" maxVersion="1.7" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
-  <NonVisualComponents>
-    <Menu class="javax.swing.JMenuBar" name="jMenuBar">
-      <Properties>
-        <Property name="name" type="java.lang.String" value="jMenuBar"/>
-      </Properties>
-      <SubComponents>
-        <Menu class="javax.swing.JMenu" name="jMenu1">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="File"/>
-            <Property name="name" type="java.lang.String" value="jMenu1"/>
-          </Properties>
-        </Menu>
-        <Menu class="javax.swing.JMenu" name="jMenu2">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Edit"/>
-            <Property name="name" type="java.lang.String" value="jMenu2"/>
-          </Properties>
-        </Menu>
-      </SubComponents>
-    </Menu>
-  </NonVisualComponents>
   <Properties>
-    <Property name="defaultCloseOperation" type="int" value="3"/>
+    <Property name="defaultCloseOperation" type="int" value="0"/>
     <Property name="title" type="java.lang.String" value="Client Server Application"/>
     <Property name="resizable" type="boolean" value="false"/>
   </Properties>
   <SyntheticProperties>
-    <SyntheticProperty name="menuBar" type="java.lang.String" value="jMenuBar"/>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
   </SyntheticProperties>
+  <Events>
+    <EventHandler event="windowClosing" listener="java.awt.event.WindowListener" parameters="java.awt.event.WindowEvent" handler="formWindowClosing"/>
+  </Events>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="true"/>
@@ -108,7 +89,11 @@
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="serverCancelButton" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <Component id="serverClientEditCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" attributes="0">
+                                      <Component id="serverClientEditCheckBox" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Component id="serverConfirmConectionCheckBox" min="-2" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
                               <EmptySpace min="0" pref="3" max="32767" attributes="0"/>
                           </Group>
@@ -136,7 +121,10 @@
                           <Component id="serverPasswordCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="serverClientEditCheckBox" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="serverClientEditCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="serverConfirmConectionCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="serverClientListScrollPane" pref="158" max="32767" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -173,9 +161,6 @@
                 <Property name="text" type="java.lang.String" value="127.0.0.1"/>
                 <Property name="name" type="java.lang.String" value="serverIPTextField" noResource="true"/>
               </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="serverIPTextFieldActionPerformed"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JSpinner" name="serverPortSpinner">
               <Properties>
@@ -282,8 +267,6 @@
                 <Property name="name" type="java.lang.String" value="serverPasswordField"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="serverPasswordFieldActionPerformed"/>
-                <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="serverPasswordFieldKeyPressed"/>
                 <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="serverPasswordFieldKeyReleased"/>
               </Events>
             </Component>
@@ -295,8 +278,14 @@
             </Component>
             <Component class="javax.swing.JCheckBox" name="serverClientEditCheckBox">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Habilitar Edi&#xe7;&#xe3;o do Cliente"/>
+                <Property name="text" type="java.lang.String" value="Habilitar Edi&#xe7;&#xe3;o"/>
                 <Property name="name" type="java.lang.String" value="serverClientEditCheckBox"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JCheckBox" name="serverConfirmConectionCheckBox">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Confirmar a Conex&#xe3;o"/>
+                <Property name="name" type="java.lang.String" value="serverConfirmConectionCheckBox"/>
               </Properties>
             </Component>
           </SubComponents>
@@ -322,11 +311,16 @@
                           <Group type="102" alignment="1" attributes="0">
                               <Component id="clientIPLabel" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="clientIPTextField" pref="145" max="32767" attributes="0"/>
+                              <Component id="clientIPTextField" max="32767" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="clientPortLabel" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
                               <Component id="clientPortSpinner" min="-2" pref="67" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="clientPasswordLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="clientPasswordField" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
@@ -339,12 +333,12 @@
                                       <Component id="clientCancelButton" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
-                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="3" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
-                              <Component id="clientPasswordLabel" min="-2" max="-2" attributes="0"/>
+                              <Component id="clientNickNameLabel" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="clientPasswordField" pref="241" max="32767" attributes="0"/>
+                              <Component id="clientNickNameTextField" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -365,10 +359,15 @@
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="clientNickNameLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="clientNickNameTextField" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="clientPasswordLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="clientPasswordField" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="219" max="32767" attributes="0"/>
+                      <EmptySpace pref="184" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="clientCancelButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="clientDisconnectButton" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -392,9 +391,6 @@
                 <Property name="text" type="java.lang.String" value="127.0.0.1"/>
                 <Property name="name" type="java.lang.String" value="clientIPTextField"/>
               </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clientIPTextFieldActionPerformed"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="clientPortLabel">
               <Properties>
@@ -477,6 +473,17 @@
             <Component class="javax.swing.JPasswordField" name="clientPasswordField">
               <Properties>
                 <Property name="name" type="java.lang.String" value="clientPasswordField"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="clientNickNameLabel">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Apelido:"/>
+                <Property name="name" type="java.lang.String" value="clientNickNameLabel"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JTextField" name="clientNickNameTextField">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="clientNickNameTextField"/>
               </Properties>
             </Component>
           </SubComponents>
