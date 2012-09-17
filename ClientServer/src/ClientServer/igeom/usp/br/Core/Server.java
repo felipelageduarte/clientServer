@@ -1,8 +1,8 @@
-package ClientServer.igeom.usp.br.core;
+package ClientServer.igeom.usp.br.Core;
 
 import ClientServer.igeom.usp.br.Log.Log;
-import ClientServer.igeom.usp.br.network.ClientServer;
-import ClientServer.igeom.usp.br.protocol.CommunicationType;
+import ClientServer.igeom.usp.br.Network.ClientServer;
+import ClientServer.igeom.usp.br.Protocol.CommunicationType;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -23,10 +23,10 @@ public class Server extends Observable implements Runnable {
 
     public Server(ClientServer clientServer, ServerConfiguration config) throws UnknownHostException, IOException {
         this.config = config;
+        this.serverConnection = new ServerConnection(this);
         this.clientServer = clientServer;
         this.serverThreadList = new ArrayList<ServerThread>();
         this.actionQueue = new LinkedList<MessagePojo>();
-        this.serverConnection = new ServerConnection(this);
         clientNumber = 0;
     }
 
@@ -52,9 +52,9 @@ public class Server extends Observable implements Runnable {
         }
     }
 
-    public void addAction(Object whoSendng, CommunicationType reason, Object request) {
+    public void addAction(Integer whoSending, CommunicationType reason, Object request) {
         synchronized (actionQueue) {
-            actionQueue.offer(new MessagePojo(whoSendng, reason, request));
+            actionQueue.offer(new MessagePojo(whoSending, reason, request));
         }
     }
 
@@ -124,16 +124,6 @@ public class Server extends Observable implements Runnable {
                         break;
                 }
             }
-
-        }
-
-        Log.debug("Stopping connetion Thread");
-        serverConnection.shutdown();
-        while (!serverConnection.isStopped()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-            }
         }
 
         Log.debug("Stopping connected threads...");
@@ -153,6 +143,15 @@ public class Server extends Observable implements Runnable {
                 }
             }
         }
+
+//        Log.debug("Stopping connetion Thread");
+//        serverConnection.shutdown();
+//        while (!serverConnection.isStopped()) {
+//            try {
+//                Thread.sleep(100);
+//            } catch (InterruptedException ex) {
+//            }
+//        }
 
         Log.info("Server Stopped.");
         Log.debug("------------------------------------------------------------");
@@ -176,9 +175,9 @@ public class Server extends Observable implements Runnable {
      * data
      * @param obj The Object that should be sent
      */
-    private void newData(Object cameFrom, Object obj) {
+    private void newData(int cameFrom, Object obj) {
         ServerThread sT = null;
-        Log.debug("Sending BroadCast Data: " + obj.toString());
+        Log.debug("Broadcasting incomming Data: " + obj.toString());
         synchronized (serverThreadList) {
             clientServer.newData(cameFrom, obj);
             for (int i = 0; i < serverThreadList.size(); ++i) {
@@ -188,6 +187,30 @@ public class Server extends Observable implements Runnable {
                     serverThreadList.remove(i);
                 } else {
                     sT.sendData(cameFrom, obj);
+                }
+            }
+        }
+    }
+
+    void newClient(Integer index, String nickName) {
+        clientServer.updateClientListInterface();
+    }
+
+    void clientShutdown() {
+        clientServer.updateClientListInterface();
+    }
+
+    public void sendData(Object data) {
+        ServerThread sT = null;
+        Log.debug("Sending Data: " + data.toString());
+        synchronized (serverThreadList) {
+            for (int i = 0; i < serverThreadList.size(); ++i) {
+                sT = serverThreadList.get(i);
+                if (sT.isStopped()) {
+                    Log.debug("Remove dead Thread from threads vector");
+                    serverThreadList.remove(i);
+                } else {
+                    sT.sendData(0, data);
                 }
             }
         }

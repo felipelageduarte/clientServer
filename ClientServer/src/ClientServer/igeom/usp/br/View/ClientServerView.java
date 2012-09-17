@@ -1,10 +1,11 @@
-package ClientServer.igeom.usp.br.view;
+package ClientServer.igeom.usp.br.View;
 
-import ClientServer.igeom.usp.br.core.ClientConfiguration;
-import ClientServer.igeom.usp.br.core.ServerConfiguration;
-import ClientServer.igeom.usp.br.network.ClientServer;
+import ClientServer.igeom.usp.br.Core.ClientConfiguration;
+import ClientServer.igeom.usp.br.Core.ServerConfiguration;
+import ClientServer.igeom.usp.br.Network.ClientServer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import javax.swing.JOptionPane;
 
 public class ClientServerView extends javax.swing.JFrame {
 
@@ -46,6 +47,11 @@ public class ClientServerView extends javax.swing.JFrame {
         this.serverPasswordField.setEditable(enable);
         this.serverPasswordCheckBox.setEnabled(enable);
     }
+    
+    public void clientStoppedAndAlert(String titleBar, String msg) {
+        JOptionPane.showMessageDialog(null, msg, titleBar, JOptionPane.WARNING_MESSAGE);
+        clientStopped();
+    }
 
     public void clientStopped() {
         enableClientIntreface(true);
@@ -66,6 +72,11 @@ public class ClientServerView extends javax.swing.JFrame {
         this.clientDisconnectButton.setEnabled(true);
         this.clientStatusLabel.setForeground(new java.awt.Color(255, 255, 0));
         this.clientStatusLabel.setText("Conectando...");
+    }
+    
+    public void serverStoppedAndAlert(String titleBar, String msg) {
+        JOptionPane.showMessageDialog(null, msg, titleBar, JOptionPane.WARNING_MESSAGE);
+        serverStopped();
     }
 
     public void serverStopped() {
@@ -102,13 +113,13 @@ public class ClientServerView extends javax.swing.JFrame {
         this.clientStatusLabel.setText("Conectado");
     }
 
-    public void updateClientListInterface(String list) {       
+    public void updateClientListInterface(String list) {
         serverClientListTextArea.setText(list);
     }
 
     private void Fechar() {
         /**
-        this.setVisible(false);
+         this.setVisible(false);
         /*/
         System.exit(0);
         /**/
@@ -123,7 +134,7 @@ public class ClientServerView extends javax.swing.JFrame {
                 config.setPassword(serverPasswordField.getText());
             }
             config.setConfirmConnection(serverConfirmConectionCheckBox.isSelected());
-            clientServer.newServer(config);                       
+            clientServer.newServer(config);
         }
     }//GEN-LAST:event_serverConnectButtonActionPerformed
 
@@ -151,8 +162,9 @@ public class ClientServerView extends javax.swing.JFrame {
 
     private void clientDisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientDisconnectButtonActionPerformed
         if (conectado) {
-            clientServer.shutdownClient();
-            clientStopped();
+            if (clientServer.shutdownClient()) {
+                clientStopped();
+            }
         }
     }//GEN-LAST:event_clientDisconnectButtonActionPerformed
 
@@ -488,11 +500,15 @@ public class ClientServerView extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(applicationTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 335, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(applicationTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 335, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(applicationTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(applicationTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
