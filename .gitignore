@@ -8,3 +8,6 @@
 /clientServer2/dist/
 /clientServer3/nbproject/private/
 /clientServer3/build/
+/ClientServer/dist/
+*.log*
+*.jar
