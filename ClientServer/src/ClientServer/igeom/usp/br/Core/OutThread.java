@@ -1,7 +1,8 @@
 package ClientServer.igeom.usp.br.Core;
 
+import ClientServer.igeom.usp.br.Network.MessagePojo;
 import ClientServer.igeom.usp.br.Log.Log;
-import ClientServer.igeom.usp.br.Protocol.CommunicationType;
+import ClientServer.igeom.usp.br.Network.CommunicationType;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -14,11 +15,11 @@ public class OutThread extends Thread {
     private ObjectOutputStream out;
     private Boolean stop;
     private boolean stopped;
-    protected LinkedList<MessagePojo> sendQueue;
+    protected final LinkedList<MessagePojo> queue;
 
     public OutThread(Socket socket) throws IOException {
-        this.sendQueue = new LinkedList<MessagePojo>();
         this.out = new ObjectOutputStream(socket.getOutputStream());
+        this.queue = new LinkedList<MessagePojo>();
         stop = false;
     }
 
@@ -38,15 +39,19 @@ public class OutThread extends Thread {
         }
     }
 
-    public void addRequest(Integer whoSending, CommunicationType reason, Object request) {
-        synchronized (sendQueue) {
-            sendQueue.offer(new MessagePojo(whoSending, reason, request));
+    public void newMessage(MessagePojo message) {
+        synchronized (queue) {
+            queue.offer(message);
         }
     }
+    
+    public void newMessage(Integer whoSending, CommunicationType reason, Object request) {
+        newMessage(new MessagePojo(whoSending, reason, request));        
+    }
 
-    private MessagePojo getIncommingRequest() throws InterruptedException {
-        synchronized (sendQueue) {
-            return sendQueue.pollFirst();
+    private MessagePojo getMessage() throws InterruptedException {
+        synchronized (queue) {
+            return queue.pollFirst();
         }
     }
 
@@ -59,7 +64,7 @@ public class OutThread extends Thread {
         while (!isStop()) {
             try {
                 //busy wait for incomming request from client
-                while ((obj = getIncommingRequest()) == null) {
+                while ((obj = getMessage()) == null) {
                     Thread.sleep(100);
                     if (isStop()) {
                         break;

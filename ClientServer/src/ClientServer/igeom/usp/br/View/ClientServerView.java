@@ -3,11 +3,15 @@ package ClientServer.igeom.usp.br.View;
 import ClientServer.igeom.usp.br.Core.ClientConfiguration;
 import ClientServer.igeom.usp.br.Core.ServerConfiguration;
 import ClientServer.igeom.usp.br.Network.ClientServer;
+import ClientServer.igeom.usp.br.Network.MessagePojo;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 import javax.swing.JOptionPane;
 
-public class ClientServerView extends javax.swing.JFrame {
+public class ClientServerView extends javax.swing.JFrame implements Observer {
 
     protected int Port = 4000;
     protected boolean conectado;
@@ -17,17 +21,30 @@ public class ClientServerView extends javax.swing.JFrame {
         initComponents();
         serverIPTextField.setText(localhost());
         this.clientServer = clientServer;
+        clientServer.addObserver(this);
 
-        clientStopped();
-        serverStopped();
+        //clientStopped();
+        //serverStopped();
 
-        if (clientServer.getClient() != null && !clientServer.getClient().isStopped()) {
-            clientRunning();
+//        if (clientServer.getClient() != null && !clientServer.getClient().isStopped()) {
+//            clientRunning();
+//        }
+//        if (clientServer.getServer() != null && !clientServer.getServer().isStopped()) {
+//            serverRunning();
+//        }
+
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        MessagePojo message = (MessagePojo) arg;
+        switch (message.getReason()) {
+            case ConnectionAccept:
+                clientServer.getClientList();
+                break;
+            default:
+                break;
         }
-        if (clientServer.getServer() != null && !clientServer.getServer().isStopped()) {
-            serverRunning();
-        }
-
     }
 
     public void enableClientIntreface(boolean enable) {
@@ -47,7 +64,7 @@ public class ClientServerView extends javax.swing.JFrame {
         this.serverPasswordField.setEditable(enable);
         this.serverPasswordCheckBox.setEnabled(enable);
     }
-    
+
     public void clientStoppedAndAlert(String titleBar, String msg) {
         JOptionPane.showMessageDialog(null, msg, titleBar, JOptionPane.WARNING_MESSAGE);
         clientStopped();
@@ -64,7 +81,7 @@ public class ClientServerView extends javax.swing.JFrame {
         this.clientStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
     }
 
-    public void clientRunning() {
+    public void clientConnected() {
         enableClientIntreface(false);
         enableServerIntreface(false);
 
@@ -73,7 +90,16 @@ public class ClientServerView extends javax.swing.JFrame {
         this.clientStatusLabel.setForeground(new java.awt.Color(255, 255, 0));
         this.clientStatusLabel.setText("Conectando...");
     }
-    
+
+    public void clientConnecting() {
+        enableClientIntreface(false);
+        enableServerIntreface(false);
+
+        this.clientDisconnectButton.setEnabled(true);
+        this.clientStatusLabel.setForeground(new java.awt.Color(255, 255, 0));
+        this.clientStatusLabel.setText("Conectando...");
+    }
+
     public void serverStoppedAndAlert(String titleBar, String msg) {
         JOptionPane.showMessageDialog(null, msg, titleBar, JOptionPane.WARNING_MESSAGE);
         serverStopped();
@@ -100,6 +126,15 @@ public class ClientServerView extends javax.swing.JFrame {
         this.serverStatusLabel.setText("No Ar");
     }
 
+    public void serverConnecting() {
+        enableClientIntreface(false);
+        enableServerIntreface(false);
+
+        this.serverDisconnectButton.setEnabled(true);
+        this.serverStatusLabel.setForeground(new java.awt.Color(255, 255, 0));
+        this.serverStatusLabel.setText("Iniciando...");
+    }
+
     private String localhost() {
         try {
             return InetAddress.getLocalHost().getHostAddress();
@@ -113,12 +148,14 @@ public class ClientServerView extends javax.swing.JFrame {
         this.clientStatusLabel.setText("Conectado");
     }
 
-    public void updateClientListInterface(String list) {
-        serverClientListTextArea.setText(list);
+    public void updateClientListInterface(ArrayList<String> list) {
+        for (String client : list) {
+            serverClientListTextArea.setText(client + "\n");
+        }
     }
 
     private void Fechar() {
-        /**
+        /**/
          this.setVisible(false);
         /*/
         System.exit(0);
@@ -127,14 +164,18 @@ public class ClientServerView extends javax.swing.JFrame {
 
     private void serverConnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverConnectButtonActionPerformed
         if (!conectado) {
-            serverRunning();
+            serverConnecting();
             ServerConfiguration config = new ServerConfiguration((Integer) this.serverPortSpinner.getValue());
             config.setEnableClientEdition(serverClientEditCheckBox.isSelected());
             if (serverPasswordCheckBox.isSelected()) {
                 config.setPassword(serverPasswordField.getText());
             }
             config.setConfirmConnection(serverConfirmConectionCheckBox.isSelected());
-            clientServer.newServer(config);
+            if (clientServer.newServer(config)) {
+                serverRunning();
+            } else {
+                serverStopped();
+            }
         }
     }//GEN-LAST:event_serverConnectButtonActionPerformed
 
@@ -151,20 +192,22 @@ public class ClientServerView extends javax.swing.JFrame {
 
     private void clientConnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientConnectButtonActionPerformed
         if (!conectado) {
-            clientRunning();
+            clientConnecting();
             ClientConfiguration config = new ClientConfiguration(clientPasswordField.getText(),
                     clientNickNameTextField.getText().trim(),
                     clientIPTextField.getText(),
                     (Integer) clientPortSpinner.getValue());
-            clientServer.newClient(config);
+            if (clientServer.newClient(config)) {
+                clientConected();
+            } else {
+                clientStopped();
+            }
         }
     }//GEN-LAST:event_clientConnectButtonActionPerformed
 
     private void clientDisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientDisconnectButtonActionPerformed
-        if (conectado) {
-            if (clientServer.shutdownClient()) {
-                clientStopped();
-            }
+        if (clientServer.shutdownClient()) {
+            clientStopped();
         }
     }//GEN-LAST:event_clientDisconnectButtonActionPerformed
 

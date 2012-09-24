@@ -1,5 +1,5 @@
 
-package ClientServer.igeom.usp.br.Protocol;
+package ClientServer.igeom.usp.br.Core;
 
 import java.util.Random;
 

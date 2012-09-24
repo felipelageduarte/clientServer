@@ -1,7 +1,7 @@
 package ClientServer.igeom.usp.br.Core;
 
 import ClientServer.igeom.usp.br.Log.Log;
-import ClientServer.igeom.usp.br.Protocol.CommunicationType;
+import ClientServer.igeom.usp.br.Network.CommunicationType;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -61,7 +61,7 @@ public class ServerConnection implements Runnable {
                 }
                 Log.error("Error accepting client connection" + e.getMessage());
             }
-            server.addAction(0, CommunicationType.NewClient, clientSocket);
+            server.newMessage(0, CommunicationType.NewClient, clientSocket);
         }        
 
         Log.info("ServerConnection stopped.");

@@ -5,8 +5,8 @@
 package ClientServer.igeom.usp.br.Core;
 
 import ClientServer.igeom.usp.br.Log.Log;
-import ClientServer.igeom.usp.br.Protocol.CommunicationType;
-import ClientServer.igeom.usp.br.Protocol.ConnectionChallenge;
+import ClientServer.igeom.usp.br.Network.CommunicationType;
+import ClientServer.igeom.usp.br.Network.MessagePojo;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -55,7 +55,7 @@ public class ServerThread extends NetworkElement {
     
     private void connectionAccept(){
         this.connectionAccept = true;
-        server.newClient(index,nickName);
+        server.newMessage(index,CommunicationType.ConnectionAccept,nickName);
     }
 
     private Boolean isStop() {
@@ -71,25 +71,15 @@ public class ServerThread extends NetworkElement {
     public void shutdown() {
         synchronized (stop) {
             //stop = true;
-            outThread.addRequest(0, CommunicationType.Exit, null);
+            outThread.newMessage(0, CommunicationType.Exit, null);
         }
-    }
-
-    public void sendRequest(CommunicationType reason, Object request) {
-        outThread.addRequest(0, reason, request);
-    }
-
-    public void sendData(int cameFrom, Object request) {
-        if (cameFrom != index) {
-            outThread.addRequest(cameFrom, CommunicationType.Data, request);
-        }
-    }
+    }        
 
     @Override
     public void run() {
         stopped = false;
         Log.info("New ServerThread running...");
-        MessagePojo communication = null;
+        MessagePojo message = null;
 
         // I/O Threads
         try {
@@ -104,42 +94,46 @@ public class ServerThread extends NetworkElement {
 
         challengeNumber = ConnectionChallenge.getNumber();
         Log.debug("Sending Challenge number: " + challengeNumber);
-        outThread.addRequest(0, CommunicationType.ChallengeNumber, challengeNumber);
+        outThread.newMessage(index, CommunicationType.ChallengeNumber, challengeNumber);
 
         while (!isStop()) {
             try {
                 //busy wait for incomming request from client
-                while ((communication = getIncommingMessage()) == null) {
+                while ((message = getMessage()) == null) {
                     Thread.sleep(100);
                     if (isStop()) {
                         break;
                     }
                 }
                 if (!isStop()) {
-                    Log.debug("Incoming message from Client-" + index + ": " + communication.getReason().toString());
+                    Log.debug("Incoming message from Client-" + index + ": " + message.getReason().toString());
                     //process incomming request
-                    switch (communication.getReason()) {
+                    switch (message.getReason()) {
                         case Exit:
                             shutdown();
                             break;
                         case ChallengeAnswer:
-                            ChallengeAnswer(communication);
+                            ChallengeAnswer(message);
                             break;
                         case Password:
-                            password(communication);
+                            password(message);
                             break;
                         case NickName:
-                            nickName(communication);
+                            nickName(message);
                             break;
-                        case Data:
+                        case SendData:
+                            message.setReason(CommunicationType.IncommingData);
+                            outThread.newMessage(message);
+                            break;
+                        case IncommingData:
                             if (connectionAccept) {
-                                this.server.addAction(communication.getWhoSend(),
-                                        communication.getReason(),
-                                        communication.getObj());
+                                String aux = index+"<- "+message.whoSend()+ ":" + (String)message.getObj();
+                                message.setObj(aux);
+                                server.newMessage(message);
                             }
                             break;
                         default:
-                            Log.warn("Unexpected message: " + communication.getReason().toString());
+                            Log.warn("Unexpected message: " + message.getReason().toString());
                             break;
                     }
                 }
@@ -183,19 +177,19 @@ public class ServerThread extends NetworkElement {
             if (Math.abs(challengeAnswer - ConnectionChallenge.calc(challengeNumber)) <= Math.pow(10, -5)) {
                 if (config.isPasswordRequired()) {
                     Log.debug("Password Required");
-                    outThread.addRequest(0, CommunicationType.PasswordRequired, null);
+                    outThread.newMessage(0, CommunicationType.PasswordRequired, null);
                 } else {
                     Log.debug("Nick Name Required");
-                    outThread.addRequest(0, CommunicationType.NickNameRequired, null);
+                    outThread.newMessage(0, CommunicationType.NickNameRequired, null);
                 }
             } else {
                 Log.fatal("Connection not accept");
-                outThread.addRequest(0, CommunicationType.ConnectionNotAccept, null);
+                outThread.newMessage(0, CommunicationType.ConnectionNotAccept, null);
                 shutdown();
             }
         } catch (ClassCastException ex) {
             Log.warn("Problem on interpret Object of the incoming message", ex);
-            outThread.addRequest(0, CommunicationType.ConnectionNotAccept, null);
+            outThread.newMessage(0, CommunicationType.ConnectionNotAccept, null);
             shutdown();
         }
     }
@@ -206,15 +200,15 @@ public class ServerThread extends NetworkElement {
             Log.debug("Incomming Password Answer: " + password);
             if (password.equals(config.getPassword())) {
                 Log.debug("Conection accept");
-                outThread.addRequest(0, CommunicationType.NickNameRequired, index);
+                outThread.newMessage(0, CommunicationType.NickNameRequired, index);
             } else {
                 Log.fatal("Wrong Password");
-                outThread.addRequest(0, CommunicationType.WrongPassword, null);
+                outThread.newMessage(0, CommunicationType.WrongPassword, null);
                 shutdown();
             }
         } catch (ClassCastException ex) {
             Log.warn("Problem on interpret Object of the incoming message", ex);
-            outThread.addRequest(0, CommunicationType.ConnectionNotAccept, null);
+            outThread.newMessage(0, CommunicationType.ConnectionNotAccept, null);
             shutdown();
         }
     }
@@ -225,7 +219,7 @@ public class ServerThread extends NetworkElement {
             Log.debug("Incomming NickName Answer: " + nickName);
             if (nickName.isEmpty()) {
                 nickName = "Client-" + index;
-                outThread.addRequest(0, CommunicationType.NickName, nickName);
+                outThread.newMessage(0, CommunicationType.NickName, nickName);
             }
             if (config.isConfirmConnection()) {
                 //Custom button text
@@ -240,22 +234,22 @@ public class ServerThread extends NetworkElement {
                         options[0]); //default button title
                 if (action == JOptionPane.YES_OPTION || action == JOptionPane.OK_OPTION) {
                     Log.info("Connection Accept");
-                    outThread.addRequest(0, CommunicationType.ConnectionAccept, null);
+                    outThread.newMessage(0, CommunicationType.ConnectionAccept, null);
                     this.connectionAccept();
                 } else {
                     Log.info("Connection Not Accept");
-                    outThread.addRequest(0, CommunicationType.ConnectionNotAccept, null);
+                    outThread.newMessage(0, CommunicationType.ConnectionNotAccept, null);
                     shutdown();
                     return;
                 }
             } else {
                 Log.debug("Conection accept");
-                outThread.addRequest(0, CommunicationType.ConnectionAccept, null);
+                outThread.newMessage(0, CommunicationType.ConnectionAccept, null);
                 this.connectionAccept();
             }
         } catch (ClassCastException ex) {
             Log.warn("Problem on interpret Object of the incoming message", ex);
-            outThread.addRequest(0, CommunicationType.ConnectionNotAccept, null);
+            outThread.newMessage(0, CommunicationType.ConnectionNotAccept, null);
             shutdown();
         }
     }

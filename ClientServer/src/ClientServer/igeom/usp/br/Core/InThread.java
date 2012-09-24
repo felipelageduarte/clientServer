@@ -1,5 +1,6 @@
 package ClientServer.igeom.usp.br.Core;
 
+import ClientServer.igeom.usp.br.Network.MessagePojo;
 import ClientServer.igeom.usp.br.Log.Log;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -38,11 +39,11 @@ public class InThread extends Thread {
     public void run() {
         this.stopped = false;
         Log.info("InThread running...");
-        MessagePojo request = null;
+        MessagePojo message = null;
         while (!isStop()) {
             try {
-                request = (MessagePojo) in.readObject();
-                architectureThread.addMessage(request);
+                message = (MessagePojo) in.readObject();
+                architectureThread.newMessage(message);
             } catch (IOException ex) {
                 shutdown();
             } catch (ClassNotFoundException ex) {

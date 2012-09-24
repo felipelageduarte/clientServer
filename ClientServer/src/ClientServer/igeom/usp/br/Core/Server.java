@@ -1,32 +1,35 @@
 package ClientServer.igeom.usp.br.Core;
 
+import ClientServer.igeom.usp.br.Network.MessagePojo;
 import ClientServer.igeom.usp.br.Log.Log;
 import ClientServer.igeom.usp.br.Network.ClientServer;
-import ClientServer.igeom.usp.br.Protocol.CommunicationType;
+import ClientServer.igeom.usp.br.Network.CommunicationType;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Observable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Server extends Observable implements Runnable {
 
     private ServerConfiguration config;
+    private ClientServer clientServer;
     private ServerConnection serverConnection;
     private ArrayList<ServerThread> serverThreadList = null;
-    protected LinkedList<MessagePojo> actionQueue;
+    protected final LinkedList<MessagePojo> queue;
     private boolean stop;
     private boolean stopped;
     private static int clientNumber;
-    private ClientServer clientServer;
 
     public Server(ClientServer clientServer, ServerConfiguration config) throws UnknownHostException, IOException {
         this.config = config;
         this.serverConnection = new ServerConnection(this);
-        this.clientServer = clientServer;
         this.serverThreadList = new ArrayList<ServerThread>();
-        this.actionQueue = new LinkedList<MessagePojo>();
+        this.queue = new LinkedList<MessagePojo>();
+        this.clientServer = clientServer;
         clientNumber = 0;
     }
 
@@ -52,15 +55,19 @@ public class Server extends Observable implements Runnable {
         }
     }
 
-    public void addAction(Integer whoSending, CommunicationType reason, Object request) {
-        synchronized (actionQueue) {
-            actionQueue.offer(new MessagePojo(whoSending, reason, request));
+    public void newMessage(MessagePojo message) {
+        synchronized (queue) {
+            queue.offer(message);
         }
     }
 
-    private MessagePojo getIncommingRequest() {
-        synchronized (actionQueue) {
-            return actionQueue.pollFirst();
+    public void newMessage(Integer whoSending, CommunicationType reason, Object request) {
+        newMessage(new MessagePojo(whoSending, reason, request));
+    }
+
+    private MessagePojo getMessage() throws InterruptedException {
+        synchronized (queue) {
+            return queue.pollFirst();
         }
     }
 
@@ -91,38 +98,51 @@ public class Server extends Observable implements Runnable {
     public void run() {
         Log.info("Server Up...");
         stopped = false;
-        MessagePojo communication = null;
+        MessagePojo message = null;
 
         new Thread(serverConnection).start();
 
         while (!stop) {
-            //busy wait for incomming request from client
-            while ((communication = getIncommingRequest()) == null) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
+            try {
+                //busy wait for incomming request from client
+                while ((message = getMessage()) == null) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                    }
+                    if (!stop) {
+                        break;
+                    }
                 }
-                if (!stop) {
-                    break;
+                if (!stop && message != null) {
+                    Log.debug("Incoming action request: " + message.getReason().toString());
+                    //process incomming request
+                    switch (message.getReason()) {
+                        case ConnectionAccept:
+                            clientServer.newMessage(message);
+                            break;
+
+                        case IncommingData:
+                            clientServer.newMessage(message);
+                            sendData(message);
+                            break;
+                        case Exit:
+                            shutdown();
+                            break;
+                        case NewClient:
+                            newClient((Socket) message.getObj());
+                            break;
+
+                        case SendData:
+                            sendData(message);
+                            break;
+                        default:
+                            Log.warn("Unexpected message: " + message.getReason().toString());
+                            break;
+                    };
                 }
-            }
-            if (!stop && communication != null) {
-                Log.debug("Incoming action request: " + communication.getReason().toString());
-                //process incomming request
-                switch (communication.getReason()) {
-                    case Exit:
-                        shutdown();
-                        break;
-                    case NewClient:
-                        newClient((Socket) communication.getObj());
-                        break;
-                    case Data:
-                        newData(communication.getWhoSend(), communication.getObj());
-                        break;
-                    default:
-                        Log.warn("Unexpected message: " + communication.getReason().toString());
-                        break;
-                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -175,44 +195,34 @@ public class Server extends Observable implements Runnable {
      * data
      * @param obj The Object that should be sent
      */
-    private void newData(int cameFrom, Object obj) {
-        ServerThread sT = null;
-        Log.debug("Broadcasting incomming Data: " + obj.toString());
-        synchronized (serverThreadList) {
-            clientServer.newData(cameFrom, obj);
-            for (int i = 0; i < serverThreadList.size(); ++i) {
-                sT = serverThreadList.get(i);
-                if (sT.isStopped()) {
-                    Log.debug("Remove dead Thread from threads vector");
-                    serverThreadList.remove(i);
-                } else {
-                    sT.sendData(cameFrom, obj);
-                }
-            }
-        }
-    }
-
     void newClient(Integer index, String nickName) {
-        clientServer.updateClientListInterface();
+        //clientServer.updateClientListInterface();
     }
 
     void clientShutdown() {
-        clientServer.updateClientListInterface();
+        //clientServer.updateClientListInterface();
     }
 
-    public void sendData(Object data) {
+    public void sendData(MessagePojo message) {
         ServerThread sT = null;
-        Log.debug("Sending Data: " + data.toString());
-        synchronized (serverThreadList) {
-            for (int i = 0; i < serverThreadList.size(); ++i) {
-                sT = serverThreadList.get(i);
-                if (sT.isStopped()) {
-                    Log.debug("Remove dead Thread from threads vector");
-                    serverThreadList.remove(i);
-                } else {
-                    sT.sendData(0, data);
+        if (message != null) {
+            Log.debug("Sending Data: " + message.toString());
+            synchronized (serverThreadList) {
+                for (int i = 0; i < serverThreadList.size(); ++i) {
+                    sT = serverThreadList.get(i);
+                    if (sT.isStopped()) {
+                        Log.debug("Remove dead Thread from threads vector");
+                        serverThreadList.remove(i);
+                    } else {
+                        if (message.whoSend() != sT.getIndex()) {
+                            message.setReason(CommunicationType.SendData);
+                            sT.newMessage(message);
+                        }
+                    }
                 }
             }
+        }else{
+            Log.warn("MessagePojo is null, nothing to be send");
         }
     }
 }

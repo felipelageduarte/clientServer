@@ -1,6 +1,5 @@
-package ClientServer.igeom.usp.br.Core;
+package ClientServer.igeom.usp.br.Network;
 
-import ClientServer.igeom.usp.br.Protocol.CommunicationType;
 import java.io.Serializable;
 
 /**
@@ -10,18 +9,19 @@ import java.io.Serializable;
  */
 public class MessagePojo implements Serializable {
 
-    Integer whoSending; // ponteiro para quem esta enviando a mensagem
-    CommunicationType reason; // razão da mensagem
-    Object obj; // objeto que sera transportado pela rede
+    private int whoSending; // ponteiro para quem esta enviando a mensagem
+    private CommunicationType reason; // razão da mensagem
+    private Object obj; // objeto que sera transportado pela rede
 
     /**
      * Construtor
      *
+     * @param whoSending Informa o codigo de quem enviou a mensagem
      * @param reason Tipo de communicação que sera transportado
      * @param obj objeto que sera transportado
      */
-    public MessagePojo(Integer whoSending, CommunicationType reason, Object obj) {
-        this.whoSending = null;
+    public MessagePojo(int whoSending, CommunicationType reason, Object obj) {
+        this.whoSending = whoSending;
         this.reason = reason;
         this.obj = obj;
     }
@@ -63,7 +63,11 @@ public class MessagePojo implements Serializable {
      *
      * @return Ponteiro para o objeto que criou a mensagem
      */
-    int getWhoSend() {
+    public int whoSend() {
         return whoSending;
+    }
+
+    public void setWhoSending(Integer whoSending) {
+        this.whoSending = whoSending;
     }
 }

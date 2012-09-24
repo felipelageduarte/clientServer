@@ -1,4 +1,4 @@
-package ClientServer.igeom.usp.br.Protocol;
+package ClientServer.igeom.usp.br.Network;
 
 /**
  * Enumeration para comunicação entre cliente e servidor
@@ -17,6 +17,7 @@ public enum CommunicationType {
     WrongPassword, 
     NickNameRequired,
     NickName,
-    Data,
+    IncommingData,
+    SendData,
     NewClient,
 }

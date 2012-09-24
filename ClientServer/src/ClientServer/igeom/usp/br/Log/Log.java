@@ -17,7 +17,7 @@ public class Log {
     private Logger logger;
     // this attribute is used to determine if log file should be truncated
     // or append in the end.
-    private static boolean append = true;
+    private static boolean append = false;
     //Handlers
     private static FileHandler fileTxt;
     private static FileHandler fileHTML;

@@ -1,24 +1,23 @@
 package ClientServer.igeom.usp.br.Network;
 
-import ClientServer.igeom.usp.br.Core.Client;
-import ClientServer.igeom.usp.br.Core.ClientConfiguration;
-import ClientServer.igeom.usp.br.Core.Server;
-import ClientServer.igeom.usp.br.Core.ServerConfiguration;
+import ClientServer.igeom.usp.br.Core.*;
 import ClientServer.igeom.usp.br.Log.Log;
-import ClientServer.igeom.usp.br.Protocol.ClientServerState;
-import ClientServer.igeom.usp.br.Protocol.CommunicationType;
-import ClientServer.igeom.usp.br.View.ClientServerView;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Observable;
-import java.util.Observer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
-public class ClientServer extends Observable implements Observer {
+public class ClientServer extends Observable implements Runnable {
 
-    private ClientServerView view = null;
+    protected final LinkedList<MessagePojo> queue;
     private Client client;
     private Server server;
+    private Boolean stop;
+    private boolean stopped;
     private int whoIsRunning;
     private static final int NOBODY = -1;
     private static final int SERVER = 0;
@@ -26,16 +25,35 @@ public class ClientServer extends Observable implements Observer {
 
     public ClientServer() {
         Log.info("New Client/Server...");
-        this.view = new ClientServerView(this);
+        this.queue = new LinkedList<MessagePojo>();
         whoIsRunning = NOBODY;
     }
 
-    public Client getClient() {
-        return client;
+    public boolean isStopped() {
+        return stopped;
     }
 
-    public Server getServer() {
-        return server;
+    public void shutdown() {
+        synchronized (stop) {
+            stop = true;
+        }
+    }
+
+    private Boolean isStop() {
+        synchronized (stop) {
+            return stop;
+        }
+    }
+
+    //used for incomming new data from software
+    public void sendData(Object data) {
+        if (whoIsRunning == CLIENT) {
+            client.newMessage(-1, CommunicationType.SendData, data);
+        } else if (whoIsRunning == SERVER) {
+            server.newMessage(0, CommunicationType.SendData, data);
+        } else {
+            //nothing to be done
+        }
     }
 
     // this code is necessary to avoid inconsistency when user want to add 
@@ -63,12 +81,38 @@ public class ClientServer extends Observable implements Observer {
             this.client = newClient;
             if (!newClient.isStopped()) {
                 whoIsRunning = CLIENT;
-                this.client.addObserver(this);
             }
             return true;
         }
     }
 
+    public boolean newClient(ClientConfiguration config) {
+        try {
+            Client _client = new Client(this, config);
+            new Thread(_client).start();
+            if (!setClient(_client)) {
+                _client.shutdown();
+                Log.warn("Problem to assign new client");
+            }
+        } catch (UnknownHostException ex) {
+            Log.error("Server not found - " + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Servidor nao "
+                    + "encontrado!\n Verifique a porta/IP informado", 
+                    "Unknow Host", 
+                    JOptionPane.WARNING_MESSAGE);
+            return false;
+        } catch (IOException ex) {
+            Log.error("Could not initiate socket - " + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Socket nao "
+                    + "criado - Conexão não estabelecida", 
+                    "I/O Exception",
+                    JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    
     // this code is necessary to avoid inconsistency when user want to add 
     // a Server in running state, while we are already handling another class 
     // in running state
@@ -94,56 +138,12 @@ public class ClientServer extends Observable implements Observer {
             this.server = newServer;
             if (!newServer.isStopped()) {
                 whoIsRunning = SERVER;
-                this.server.addObserver(this);
             }
             return true;
         }
     }
 
-    //show view
-    public void showView() {
-        this.view.setVisible(true);
-    }
-
-    //used for incomming new data from network
-    public synchronized void newData(Integer cameFrom, Object obj) {
-        if (cameFrom != 0) {
-            notifyObservers(obj);
-            setChanged();
-            notifyAll();
-        }
-    }
-
-    //used for incomming new data from software
-    public void sendData(Object data) {
-        if (whoIsRunning == CLIENT) {
-            client.sendData(data);
-        } else if (whoIsRunning == SERVER) {
-            server.sendData(data);
-        } else {
-            Log.warn("No client and neither server is running. Data could not be"
-                    + " sent via network");
-        }
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        //incomming update
-        Log.debug("Incoming update: " + ((ClientServerState) arg).toString());
-
-        //BroadCast if Server is running
-        switch ((ClientServerState) arg) {
-            case CLIENT_CONNECTED:
-                view.clientConected();
-                break;
-            default:
-                break;
-        }
-
-        //pass incomming data do iGeom
-    }
-
-    public void newServer(ServerConfiguration config) {
+    public boolean newServer(ServerConfiguration config) {
         try {
             Server server = new Server(this, config);
             new Thread(server).start();
@@ -153,39 +153,92 @@ public class ClientServer extends Observable implements Observer {
             }
         } catch (UnknownHostException ex) {
             Log.warn(ex.getMessage());
-            view.serverStopped();
+            return false;
         } catch (IOException ex) {
             Log.error(ex.getMessage());
-            view.serverStoppedAndAlert("Warning", "A porta esta sendo utilizada"
-                    + " por outra aplicação!\nTente outra porta para iniciar o "
-                    + "servidor");
+            JOptionPane.showMessageDialog(null, "A porta esta sendo "
+                    + "utilizada por outra aplicação!\nTente outra porta para "
+                    + "iniciar o servidor", "Warning", 
+                    JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    
+    public void newMessage(MessagePojo message) {
+        synchronized (queue) {
+            queue.offer(message);
         }
     }
 
-    public void shutdownServer() {
-        server.addAction(0, CommunicationType.Exit, null);
+    public void newMessage(Integer whoSending, CommunicationType reason, Object request) {
+        newMessage(new MessagePojo(whoSending, reason, request));
     }
 
-    public void newClient(ClientConfiguration config) {
-        try {
-            Client $client = new Client(config);
-            new Thread($client).start();
-            if (!setClient($client)) {
-                $client.shutdown();
-                Log.warn("Problem to assign new client");
+    protected MessagePojo getMessage() throws InterruptedException {
+        synchronized (queue) {
+            return queue.pollFirst();
+        }
+    }
+
+    @Override
+    public void run() {
+        Log.info("ClientServer Up...");
+        stopped = false;
+        stop = false;
+        MessagePojo message = null;
+
+        while (!stop) {
+            try {
+                //busy wait for incomming request from client
+                while ((message = getMessage()) == null) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                    }
+                    if (!stop) {
+                        break;
+                    }
+                }
+                if (!stop && message != null) {
+                    Log.debug("Incoming message: " + message.getReason().toString());
+                    //process incomming request
+                    switch (message.getReason()) {
+                        case ConnectionAccept:
+                        case IncommingData:
+                            setChanged();
+                            break;
+                        case Exit:
+                            shutdown();
+                            break;  
+                        default:
+                            Log.warn("Unexpected message: " + message.getReason().toString());
+                            break;
+                    }
+                    notifyObservers(message);
+                    clearChanged();
+                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
             }
-            updateClientListInterface();
-        } catch (UnknownHostException ex) {
-            Log.error("Server not found - " + ex.getMessage());
-            view.clientStoppedAndAlert("Unknow Host", "Servidor nao encontrado!"
-                    + "\n Verifique a porta/IP informado");
-        } catch (IOException ex) {
-            Log.error("Could not initiate socket - " + ex.getMessage());
-            view.clientStoppedAndAlert("I/O Exception", "Socket nao criado -"
-                    + " Conexão não estabelecida");
         }
+
+        Log.info("ClientServer Stopped .");
+        Log.debug("------------------------------------------------------------");
+        stopped = true;
     }
 
+    //used for incomming new data from network
+    public synchronized void IncommingData(MessagePojo message) {
+    }
+
+    
+    public void shutdownServer() {
+        server.newMessage(0, CommunicationType.Exit, null);
+    }
+
+    
     public boolean shutdownClient() {
         if (client != null && !client.isStopped()) {
             client.shutdown();
@@ -193,16 +246,11 @@ public class ClientServer extends Observable implements Observer {
         return true;
     }
 
-    public void updateClientListInterface() {
-        String list = "";
-        if (server != null) {
-            ArrayList<String> clientList = server.getClientList();
-            for (int i = 0; i < clientList.size(); ++i) {
-                list += (i + 1) + ": " + clientList.get(i) + "\n";
-            }
+    public ArrayList<String> getClientList() {
+        ArrayList<String> list = new ArrayList<String>();
+        if (whoIsRunning == SERVER) {
+            list = server.getClientList();            
         }
-        if (view != null) {
-            view.updateClientListInterface(list);
-        }
+        return list;    
     }
 }
