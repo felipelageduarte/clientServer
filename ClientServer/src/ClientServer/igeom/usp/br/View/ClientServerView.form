@@ -93,7 +93,7 @@
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="serverDisconnectButton" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="serverCancelButton" min="-2" max="-2" attributes="0"/>
+                                      <Component id="serverCloseButton" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
                                       <Component id="serverClientEditCheckBox" min="-2" max="-2" attributes="0"/>
@@ -135,7 +135,7 @@
                       <Component id="serverClientListScrollPane" pref="158" max="32767" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="serverCancelButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="serverCloseButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="serverDisconnectButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="serverConnectButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -244,22 +244,22 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="serverDisconnectButtonActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JButton" name="serverCancelButton">
+            <Component class="javax.swing.JButton" name="serverCloseButton">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Cancelar"/>
+                <Property name="text" type="java.lang.String" value="Fechar"/>
                 <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[93, 23]"/>
                 </Property>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[93, 23]"/>
                 </Property>
-                <Property name="name" type="java.lang.String" value="serverCancelButton" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="serverCloseButton" noResource="true"/>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[93, 23]"/>
                 </Property>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="serverCancelButtonActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="serverCloseButtonActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="serverPasswordLabel">
@@ -336,7 +336,7 @@
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="clientDisconnectButton" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="clientCancelButton" min="-2" max="-2" attributes="0"/>
+                                      <Component id="clientCloseButton" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace min="0" pref="3" max="32767" attributes="0"/>
@@ -375,7 +375,7 @@
                       </Group>
                       <EmptySpace pref="184" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="clientCancelButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="clientCloseButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="clientDisconnectButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="clientConnectButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -452,22 +452,22 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clientDisconnectButtonActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JButton" name="clientCancelButton">
+            <Component class="javax.swing.JButton" name="clientCloseButton">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Cancelar"/>
+                <Property name="text" type="java.lang.String" value="Fechar"/>
                 <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[93, 23]"/>
                 </Property>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[93, 23]"/>
                 </Property>
-                <Property name="name" type="java.lang.String" value="clientCancelButton"/>
+                <Property name="name" type="java.lang.String" value="clientCloseButton"/>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[93, 23]"/>
                 </Property>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clientCancelButtonActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clientCloseButtonActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="clientPasswordLabel">

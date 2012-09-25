@@ -106,7 +106,7 @@ public class ServerThread extends NetworkElement {
                     }
                 }
                 if (!isStop()) {
-                    Log.debug("Incoming message from Client-" + index + ": " + message.getReason().toString());
+                    Log.debug(nickName+": processing message-" + index + ": " + message.getReason().toString());
                     //process incomming request
                     switch (message.getReason()) {
                         case Exit:
@@ -122,13 +122,12 @@ public class ServerThread extends NetworkElement {
                             nickName(message);
                             break;
                         case SendData:
+                            Log.debug(nickName+": Sending data "+message.getObj().toString());
                             message.setReason(CommunicationType.IncommingData);
                             outThread.newMessage(message);
                             break;
                         case IncommingData:
                             if (connectionAccept) {
-                                String aux = index+"<- "+message.whoSend()+ ":" + (String)message.getObj();
-                                message.setObj(aux);
                                 server.newMessage(message);
                             }
                             break;

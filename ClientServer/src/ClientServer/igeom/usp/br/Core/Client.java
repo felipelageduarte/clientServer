@@ -110,8 +110,8 @@ public class Client extends NetworkElement {
                                 outThread.newMessage(message);
                                 break;
                             case IncommingData:
-                                String aux = index+"-> "+message.whoSend()+ ":" + (String)message.getObj();
-                                message.setObj(aux);
+                                //String aux = index+"-> "+message.whoSend()+ ":" + (String)message.getObj();
+                                //message.setObj(aux);
                                 this.clientServer.newMessage(message);
                                 break;
                             default:

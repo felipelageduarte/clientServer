@@ -121,7 +121,6 @@ public class Server extends Observable implements Runnable {
                         case ConnectionAccept:
                             clientServer.newMessage(message);
                             break;
-
                         case IncommingData:
                             clientServer.newMessage(message);
                             sendData(message);
@@ -132,7 +131,6 @@ public class Server extends Observable implements Runnable {
                         case NewClient:
                             newClient((Socket) message.getObj());
                             break;
-
                         case SendData:
                             sendData(message);
                             break;
@@ -204,25 +202,17 @@ public class Server extends Observable implements Runnable {
     }
 
     public void sendData(MessagePojo message) {
-        ServerThread sT = null;
         if (message != null) {
             Log.debug("Sending Data: " + message.toString());
             synchronized (serverThreadList) {
-                for (int i = 0; i < serverThreadList.size(); ++i) {
-                    sT = serverThreadList.get(i);
-                    if (sT.isStopped()) {
-                        Log.debug("Remove dead Thread from threads vector");
-                        serverThreadList.remove(i);
-                    } else {
-                        if (message.whoSend() != sT.getIndex()) {
-                            message.setReason(CommunicationType.SendData);
-                            sT.newMessage(message);
-                        }
+                for (ServerThread sT : serverThreadList) {
+                    if (message.whoSend() != sT.getIndex()) {
+                        sT.newMessage(new MessagePojo(message.whoSend(),
+                                CommunicationType.SendData,
+                                message.getObj()));
                     }
                 }
             }
-        }else{
-            Log.warn("MessagePojo is null, nothing to be send");
-        }
+        } 
     }
 }

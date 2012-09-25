@@ -186,9 +186,9 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         }
     }//GEN-LAST:event_serverDisconnectButtonActionPerformed
 
-    private void serverCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverCancelButtonActionPerformed
+    private void serverCloseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverCloseButtonActionPerformed
         Fechar();
-    }//GEN-LAST:event_serverCancelButtonActionPerformed
+    }//GEN-LAST:event_serverCloseButtonActionPerformed
 
     private void clientConnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientConnectButtonActionPerformed
         if (!conectado) {
@@ -211,9 +211,9 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         }
     }//GEN-LAST:event_clientDisconnectButtonActionPerformed
 
-    private void clientCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientCancelButtonActionPerformed
+    private void clientCloseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientCloseButtonActionPerformed
         Fechar();
-    }//GEN-LAST:event_clientCancelButtonActionPerformed
+    }//GEN-LAST:event_clientCloseButtonActionPerformed
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -230,7 +230,7 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         serverClientListTextArea = new javax.swing.JTextArea();
         serverConnectButton = new javax.swing.JButton();
         serverDisconnectButton = new javax.swing.JButton();
-        serverCancelButton = new javax.swing.JButton();
+        serverCloseButton = new javax.swing.JButton();
         serverPasswordLabel = new javax.swing.JLabel();
         serverPasswordField = new javax.swing.JPasswordField();
         serverPasswordCheckBox = new javax.swing.JCheckBox();
@@ -244,7 +244,7 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         clientStatusLabel = new javax.swing.JLabel();
         clientConnectButton = new javax.swing.JButton();
         clientDisconnectButton = new javax.swing.JButton();
-        clientCancelButton = new javax.swing.JButton();
+        clientCloseButton = new javax.swing.JButton();
         clientPasswordLabel = new javax.swing.JLabel();
         clientPasswordField = new javax.swing.JPasswordField();
         clientNickNameLabel = new javax.swing.JLabel();
@@ -314,14 +314,14 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
             }
         });
 
-        serverCancelButton.setText("Cancelar");
-        serverCancelButton.setMaximumSize(new java.awt.Dimension(93, 23));
-        serverCancelButton.setMinimumSize(new java.awt.Dimension(93, 23));
-        serverCancelButton.setName("serverCancelButton"); // NOI18N
-        serverCancelButton.setPreferredSize(new java.awt.Dimension(93, 23));
-        serverCancelButton.addActionListener(new java.awt.event.ActionListener() {
+        serverCloseButton.setText("Fechar");
+        serverCloseButton.setMaximumSize(new java.awt.Dimension(93, 23));
+        serverCloseButton.setMinimumSize(new java.awt.Dimension(93, 23));
+        serverCloseButton.setName("serverCloseButton"); // NOI18N
+        serverCloseButton.setPreferredSize(new java.awt.Dimension(93, 23));
+        serverCloseButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                serverCancelButtonActionPerformed(evt);
+                serverCloseButtonActionPerformed(evt);
             }
         });
 
@@ -374,7 +374,7 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(serverDisconnectButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(serverCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(serverCloseButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(serverPanelLayout.createSequentialGroup()
                                 .addComponent(serverClientEditCheckBox)
                                 .addGap(18, 18, 18)
@@ -406,7 +406,7 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
                 .addComponent(serverClientListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(serverCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(serverCloseButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(serverDisconnectButton)
                     .addComponent(serverConnectButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
@@ -454,14 +454,14 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
             }
         });
 
-        clientCancelButton.setText("Cancelar");
-        clientCancelButton.setMaximumSize(new java.awt.Dimension(93, 23));
-        clientCancelButton.setMinimumSize(new java.awt.Dimension(93, 23));
-        clientCancelButton.setName("clientCancelButton");
-        clientCancelButton.setPreferredSize(new java.awt.Dimension(93, 23));
-        clientCancelButton.addActionListener(new java.awt.event.ActionListener() {
+        clientCloseButton.setText("Fechar");
+        clientCloseButton.setMaximumSize(new java.awt.Dimension(93, 23));
+        clientCloseButton.setMinimumSize(new java.awt.Dimension(93, 23));
+        clientCloseButton.setName("clientCloseButton");
+        clientCloseButton.setPreferredSize(new java.awt.Dimension(93, 23));
+        clientCloseButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clientCancelButtonActionPerformed(evt);
+                clientCloseButtonActionPerformed(evt);
             }
         });
 
@@ -502,7 +502,7 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(clientDisconnectButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(clientCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(clientCloseButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 3, Short.MAX_VALUE))
                     .addGroup(clientPanelLayout.createSequentialGroup()
                         .addComponent(clientNickNameLabel)
@@ -531,7 +531,7 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
                     .addComponent(clientPasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 184, Short.MAX_VALUE)
                 .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(clientCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(clientCloseButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(clientDisconnectButton)
                     .addComponent(clientConnectButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
@@ -570,7 +570,7 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
     }//GEN-LAST:event_formWindowClosing
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane applicationTabbedPane;
-    private javax.swing.JButton clientCancelButton;
+    private javax.swing.JButton clientCloseButton;
     private javax.swing.JButton clientConnectButton;
     private javax.swing.JButton clientDisconnectButton;
     private javax.swing.JLabel clientIPLabel;
@@ -583,10 +583,10 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
     private javax.swing.JLabel clientPortLabel;
     private javax.swing.JSpinner clientPortSpinner;
     private javax.swing.JLabel clientStatusLabel;
-    private javax.swing.JButton serverCancelButton;
     private javax.swing.JCheckBox serverClientEditCheckBox;
     private javax.swing.JScrollPane serverClientListScrollPane;
     private javax.swing.JTextArea serverClientListTextArea;
+    private javax.swing.JButton serverCloseButton;
     private javax.swing.JCheckBox serverConfirmConectionCheckBox;
     private javax.swing.JButton serverConnectButton;
     private javax.swing.JButton serverDisconnectButton;
