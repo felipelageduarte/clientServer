@@ -1,14 +1,15 @@
 package ClientServer.igeom.usp.br.Network;
 
-import ClientServer.igeom.usp.br.Core.*;
+import ClientServer.igeom.usp.br.Core.Client;
+import ClientServer.igeom.usp.br.Core.ClientConfiguration;
+import ClientServer.igeom.usp.br.Core.Server;
+import ClientServer.igeom.usp.br.Core.ServerConfiguration;
 import ClientServer.igeom.usp.br.Log.Log;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Observable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 public class ClientServer extends Observable implements Runnable {
@@ -29,19 +30,35 @@ public class ClientServer extends Observable implements Runnable {
         whoIsRunning = NOBODY;
     }
 
+    public boolean isServerRunning() {
+        if (whoIsRunning == SERVER) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isClientRunning() {
+        if (whoIsRunning == CLIENT) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public boolean isStopped() {
         return stopped;
+    }
+    
+    private Boolean isStop() {
+        synchronized (stop) {
+            return stop;
+        }
     }
 
     public void shutdown() {
         synchronized (stop) {
             stop = true;
-        }
-    }
-
-    private Boolean isStop() {
-        synchronized (stop) {
-            return stop;
         }
     }
 
@@ -97,14 +114,15 @@ public class ClientServer extends Observable implements Runnable {
         } catch (UnknownHostException ex) {
             Log.error("Server not found - " + ex.getMessage());
             JOptionPane.showMessageDialog(null, "Servidor nao "
-                    + "encontrado!\n Verifique a porta/IP informado", 
-                    "Unknow Host", 
+                    + "encontrado!\n Verifique a porta/IP informado",
+                    "Unknow Host",
                     JOptionPane.WARNING_MESSAGE);
             return false;
         } catch (IOException ex) {
+            ex.printStackTrace();
             Log.error("Could not initiate socket - " + ex.getMessage());
             JOptionPane.showMessageDialog(null, "Socket nao "
-                    + "criado - Conexão não estabelecida", 
+                    + "criado - Conexão não estabelecida",
                     "I/O Exception",
                     JOptionPane.WARNING_MESSAGE);
             return false;
@@ -112,7 +130,6 @@ public class ClientServer extends Observable implements Runnable {
         return true;
     }
 
-    
     // this code is necessary to avoid inconsistency when user want to add 
     // a Server in running state, while we are already handling another class 
     // in running state
@@ -158,14 +175,13 @@ public class ClientServer extends Observable implements Runnable {
             Log.error(ex.getMessage());
             JOptionPane.showMessageDialog(null, "A porta esta sendo "
                     + "utilizada por outra aplicação!\nTente outra porta para "
-                    + "iniciar o servidor", "Warning", 
+                    + "iniciar o servidor", "Warning",
                     JOptionPane.WARNING_MESSAGE);
             return false;
         }
         return true;
     }
 
-    
     public void newMessage(MessagePojo message) {
         synchronized (queue) {
             queue.offer(message);
@@ -197,7 +213,7 @@ public class ClientServer extends Observable implements Runnable {
                         Thread.sleep(100);
                     } catch (InterruptedException ex) {
                     }
-                    if (!stop) {
+                    if (stop) {
                         break;
                     }
                 }
@@ -205,13 +221,14 @@ public class ClientServer extends Observable implements Runnable {
                     Log.debug("Incoming message: " + message.getReason().toString());
                     //process incomming request
                     switch (message.getReason()) {
+                        case ClientDown:
                         case ConnectionAccept:
                         case IncommingData:
                             setChanged();
                             break;
                         case Exit:
                             shutdown();
-                            break;  
+                            break;
                         default:
                             Log.warn("Unexpected message: " + message.getReason().toString());
                             break;
@@ -220,7 +237,25 @@ public class ClientServer extends Observable implements Runnable {
                     clearChanged();
                 }
             } catch (InterruptedException ex) {
-                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+                Log.error("", ex);
+            }
+        } 
+        
+        if (whoIsRunning == CLIENT) {
+            client.shutdown();
+            while (!client.isStopped()) {                
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                }
+            }
+        } else if (whoIsRunning == SERVER) {
+            server.shutdown();
+            while (!server.isStopped()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                }
             }
         }
 
@@ -233,24 +268,24 @@ public class ClientServer extends Observable implements Runnable {
     public synchronized void IncommingData(MessagePojo message) {
     }
 
-    
     public void shutdownServer() {
-        server.newMessage(0, CommunicationType.Exit, null);
+        if (whoIsRunning == SERVER) {
+            server.newMessage(0, CommunicationType.Exit, null);
+        }
     }
 
-    
     public boolean shutdownClient() {
-        if (client != null && !client.isStopped()) {
-            client.shutdown();
+        if (whoIsRunning == CLIENT) {
+            client.newMessage(0, CommunicationType.Exit, null);
         }
         return true;
     }
 
     public ArrayList<String> getClientList() {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = null;
         if (whoIsRunning == SERVER) {
-            list = server.getClientList();            
+            list = server.getClientList();
         }
-        return list;    
+        return list;
     }
 }

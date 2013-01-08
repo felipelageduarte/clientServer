@@ -1,7 +1,7 @@
 package ClientServer.igeom.usp.br.Core;
 
-import ClientServer.igeom.usp.br.Network.MessagePojo;
 import ClientServer.igeom.usp.br.Log.Log;
+import ClientServer.igeom.usp.br.Network.MessagePojo;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
@@ -54,13 +54,13 @@ public class InThread extends Thread {
         Log.info("InThread shuting down...");
         if (in != null) {
             try {
-                Log.debug("Closing in socket;");
                 in.close();
                 Log.debug("Closed in socket;");
             } catch (IOException ex) {
                 Log.error("Could not close InThread InputStream", ex);
             }
-        }
+        }        
         this.stopped = true;
+        Log.debug("InThread - stopped:true");
     }
 }

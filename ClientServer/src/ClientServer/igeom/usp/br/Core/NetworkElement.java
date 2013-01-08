@@ -1,16 +1,16 @@
 package ClientServer.igeom.usp.br.Core;
 
-import ClientServer.igeom.usp.br.Network.MessagePojo;
 import ClientServer.igeom.usp.br.Network.CommunicationType;
+import ClientServer.igeom.usp.br.Network.MessagePojo;
 import java.util.LinkedList;
 import java.util.Observable;
 
 public abstract class NetworkElement extends Observable implements Runnable {
 
-    private final LinkedList<MessagePojo> queue;
-    protected InThread inThread;
-    protected OutThread outThread;
-    protected int type;
+    private LinkedList<MessagePojo> queue = null;
+    protected InThread inThread = null;
+    protected OutThread outThread = null;
+    protected int type = -1;
     public final static int SERVER = 0;
     public final static int CLIENT = 1;
 

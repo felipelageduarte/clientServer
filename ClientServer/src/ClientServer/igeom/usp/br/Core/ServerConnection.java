@@ -37,6 +37,10 @@ public class ServerConnection implements Runnable {
             if (serverSocket != null) {
                 this.serverSocket.close();
                 while(!serverSocket.isClosed()){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                    }
                 }
                 Log.debug("serverSocker closed");
             }
@@ -55,16 +59,16 @@ public class ServerConnection implements Runnable {
             try {
                 clientSocket = this.serverSocket.accept();
                 Log.debug("New Client - " + clientSocket.getInetAddress().toString() + ":" + clientSocket.getPort());
+                server.newMessage(0, CommunicationType.NewClient, clientSocket);
             } catch (IOException e) {
                 if (stop) {
                     continue;
                 }
                 Log.error("Error accepting client connection" + e.getMessage());
-            }
-            server.newMessage(0, CommunicationType.NewClient, clientSocket);
+            }            
         }        
 
-        Log.info("ServerConnection stopped.");
         stopped = true;
+        Log.debug("ServerConnection - stopped:true");
     }
 }

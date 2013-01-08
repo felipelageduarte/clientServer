@@ -1,14 +1,12 @@
 package ClientServer.igeom.usp.br.Core;
 
-import ClientServer.igeom.usp.br.Network.MessagePojo;
 import ClientServer.igeom.usp.br.Log.Log;
 import ClientServer.igeom.usp.br.Network.ClientServer;
 import ClientServer.igeom.usp.br.Network.CommunicationType;
+import ClientServer.igeom.usp.br.Network.MessagePojo;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 
@@ -36,10 +34,18 @@ public class Client extends NetworkElement {
     public boolean isStopped() {
         return stopped;
     }
+    
+    private Boolean isStop() {
+        synchronized (stop) {
+            return stop;
+        }
+    }
 
     public void shutdown() {
         synchronized (stop) {
-            outThread.newMessage(index, CommunicationType.Exit, null);
+            if (outThread != null) {
+                outThread.newMessage(index, CommunicationType.Exit, null);
+            }
             stop = true;
         }
     }
@@ -67,7 +73,7 @@ public class Client extends NetworkElement {
                     while ((message = getMessage()) == null) {
                         try {
                             Thread.sleep(100);
-                            if (!stop) {
+                            if (isStop()) {
                                 break;
                             }
                         } catch (InterruptedException ex) {
@@ -86,7 +92,7 @@ public class Client extends NetworkElement {
                                 break;
                             case ConnectionAccept:
                                 Log.debug("Connection Accepted");
-                                //clientServer.newMessage(message);
+                                clientServer.newMessage(message);
                                 break;
                             case ConnectionNotAccept:
                                 Log.fatal("Connection Not Accepted");
@@ -110,9 +116,7 @@ public class Client extends NetworkElement {
                                 outThread.newMessage(message);
                                 break;
                             case IncommingData:
-                                //String aux = index+"-> "+message.whoSend()+ ":" + (String)message.getObj();
-                                //message.setObj(aux);
-                                this.clientServer.newMessage(message);
+                                clientServer.newMessage(message);
                                 break;
                             default:
                                 Log.warn("Unexpected message: " + message.getReason().toString());
@@ -129,15 +133,15 @@ public class Client extends NetworkElement {
 
         Log.info("Client shuting Down...");
         try {
-            if (outThread != null) {
-                outThread.shutdown();
-                while (!outThread.isStopped()) {
-                    Thread.sleep(100);
-                }
-            }
             if (inThread != null) {
                 inThread.shutdown();
                 while (!inThread.isStopped()) {
+                    Thread.sleep(100);
+                }
+            }
+            if (outThread != null) {
+                outThread.shutdown();
+                while (!outThread.isStopped()) {
                     Thread.sleep(100);
                 }
             }
@@ -147,9 +151,9 @@ public class Client extends NetworkElement {
         } catch (IOException ex) {
             Log.error("Problem stoping ServerThread - " + ex.getMessage());
         } catch (InterruptedException ex) {
-            Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+            Log.error("Problem stoping ServerThread - " + ex.getMessage());
         }
-
+        clientServer.newMessage(index, CommunicationType.ClientDown, null);
         stopped = true;
         Log.info("Client Stoped");
         Log.debug("------------------------------------------------------------");
@@ -193,7 +197,7 @@ public class Client extends NetworkElement {
         JOptionPane.showMessageDialog(null, "Wrong Password", "Wrong Password", JOptionPane.ERROR_MESSAGE);
     }
 
-    private void NickNameRequired(MessagePojo communication) {        
+    private void NickNameRequired(MessagePojo communication) {
         outThread.newMessage(index, CommunicationType.NickName, config.getNickName());
         Log.debug("NickName sended: " + config.getNickName());
     }

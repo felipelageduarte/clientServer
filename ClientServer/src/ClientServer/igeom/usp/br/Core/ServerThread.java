@@ -52,10 +52,10 @@ public class ServerThread extends NetworkElement {
     public String getClientNickName() {
         return nickName;
     }
-    
-    private void connectionAccept(){
+
+    private void connectionAccept() {
         this.connectionAccept = true;
-        server.newMessage(index,CommunicationType.ConnectionAccept,nickName);
+        server.newMessage(index, CommunicationType.ConnectionAccept, nickName);
     }
 
     private Boolean isStop() {
@@ -70,10 +70,10 @@ public class ServerThread extends NetworkElement {
 
     public void shutdown() {
         synchronized (stop) {
-            //stop = true;
             outThread.newMessage(0, CommunicationType.Exit, null);
+            stop = true;
         }
-    }        
+    }
 
     @Override
     public void run() {
@@ -106,7 +106,7 @@ public class ServerThread extends NetworkElement {
                     }
                 }
                 if (!isStop()) {
-                    Log.debug(nickName+": processing message-" + index + ": " + message.getReason().toString());
+                    Log.debug(nickName + ": processing message-" + index + ": " + message.getReason().toString());
                     //process incomming request
                     switch (message.getReason()) {
                         case Exit:
@@ -122,7 +122,7 @@ public class ServerThread extends NetworkElement {
                             nickName(message);
                             break;
                         case SendData:
-                            Log.debug(nickName+": Sending data "+message.getObj().toString());
+                            Log.debug(nickName + ": Sending data " + message.getObj().toString());
                             message.setReason(CommunicationType.IncommingData);
                             outThread.newMessage(message);
                             break;
@@ -143,16 +143,16 @@ public class ServerThread extends NetworkElement {
             }
         }
         Log.info(nickName + " ServerThread shuting down...");
-        try {            
-            if (outThread != null) {
-                outThread.shutdown();
-                while (!outThread.isStopped()) {
-                    Thread.sleep(100);
-                }
-            }
+        try {
             if (inThread != null) {
                 inThread.shutdown();
                 while (!inThread.isStopped()) {
+                    Thread.sleep(100);
+                }
+            }
+            if (outThread != null) {
+                outThread.shutdown();
+                while (!outThread.isStopped()) {
                     Thread.sleep(100);
                 }
             }
@@ -164,9 +164,10 @@ public class ServerThread extends NetworkElement {
         } catch (InterruptedException ex) {
             Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         stopped = true;
-        server.clientShutdown();
+        Log.debug("ServerThread (" + nickName + ") - stopped:true");
+        server.newMessage(index, CommunicationType.ClientDown, null);
     }
 
     private void ChallengeAnswer(MessagePojo communication) {

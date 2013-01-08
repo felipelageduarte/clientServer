@@ -1,26 +1,25 @@
 package ClientServer.igeom.usp.br.Core;
 
-import ClientServer.igeom.usp.br.Network.MessagePojo;
 import ClientServer.igeom.usp.br.Log.Log;
 import ClientServer.igeom.usp.br.Network.ClientServer;
 import ClientServer.igeom.usp.br.Network.CommunicationType;
+import ClientServer.igeom.usp.br.Network.MessagePojo;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Server extends Observable implements Runnable {
+public class Server implements Runnable {
 
     private ServerConfiguration config;
     private ClientServer clientServer;
     private ServerConnection serverConnection;
     private ArrayList<ServerThread> serverThreadList = null;
     protected final LinkedList<MessagePojo> queue;
-    private boolean stop;
+    private Boolean stop;
     private boolean stopped;
     private static int clientNumber;
 
@@ -30,11 +29,18 @@ public class Server extends Observable implements Runnable {
         this.serverThreadList = new ArrayList<ServerThread>();
         this.queue = new LinkedList<MessagePojo>();
         this.clientServer = clientServer;
-        clientNumber = 0;
+        this.stop = false;
+        this.clientNumber = 0;
     }
 
     public synchronized boolean isStopped() {
         return stopped;
+    }
+    
+    private Boolean isStop() {
+        synchronized (stop) {
+            return stop;
+        }
     }
 
     public ServerConfiguration getConfig() {
@@ -43,7 +49,6 @@ public class Server extends Observable implements Runnable {
 
     public synchronized void shutdown() {
         Log.info("Stoping main server thread...");
-        this.stop = true;
 
         //Stop Thread that accept Connection
         serverConnection.shutdown();
@@ -53,6 +58,8 @@ public class Server extends Observable implements Runnable {
             } catch (InterruptedException ex) {
             }
         }
+
+        this.stop = true;
     }
 
     public void newMessage(MessagePojo message) {
@@ -87,8 +94,8 @@ public class Server extends Observable implements Runnable {
         updateThreadVector();
         ArrayList<String> clientList = new ArrayList<String>();
         synchronized (serverThreadList) {
-            for (int i = 0; i < serverThreadList.size(); ++i) {
-                clientList.add(serverThreadList.get(i).getClientNickName());
+            for (ServerThread st : serverThreadList) {
+                clientList.add(st.getClientNickName());
             }
         }
         return clientList;
@@ -110,7 +117,7 @@ public class Server extends Observable implements Runnable {
                         Thread.sleep(100);
                     } catch (InterruptedException ex) {
                     }
-                    if (!stop) {
+                    if (isStop()) {
                         break;
                     }
                 }
@@ -131,6 +138,9 @@ public class Server extends Observable implements Runnable {
                         case NewClient:
                             newClient((Socket) message.getObj());
                             break;
+                        case ClientDown:
+                            clientServer.newMessage(message);
+                            break;
                         case SendData:
                             sendData(message);
                             break;
@@ -145,31 +155,21 @@ public class Server extends Observable implements Runnable {
         }
 
         Log.debug("Stopping connected threads...");
-        ServerThread stAux = null;
         synchronized (serverThreadList) {
-            for (int i = 0; i < serverThreadList.size(); ++i) {
-                stAux = serverThreadList.get(i);
-                if (stAux != null) {
-                    stAux.shutdown();
-                    while (!stAux.isStopped()) {
-                        try {
-                            Thread.sleep(100);
-                        } catch (Exception ex) {
-                        }
-                        updateThreadVector();
+            //ShutDown all clients connected to server
+            for (ServerThread st : serverThreadList) {
+                st.shutdown();
+            }
+            //verify if all server Thread is down.
+            for (ServerThread st : serverThreadList) {
+                while(!st.isStopped()){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
                     }
                 }
             }
         }
-
-//        Log.debug("Stopping connetion Thread");
-//        serverConnection.shutdown();
-//        while (!serverConnection.isStopped()) {
-//            try {
-//                Thread.sleep(100);
-//            } catch (InterruptedException ex) {
-//            }
-//        }
 
         Log.info("Server Stopped.");
         Log.debug("------------------------------------------------------------");
@@ -197,10 +197,6 @@ public class Server extends Observable implements Runnable {
         //clientServer.updateClientListInterface();
     }
 
-    void clientShutdown() {
-        //clientServer.updateClientListInterface();
-    }
-
     public void sendData(MessagePojo message) {
         if (message != null) {
             Log.debug("Sending Data: " + message.toString());
@@ -213,6 +209,6 @@ public class Server extends Observable implements Runnable {
                     }
                 }
             }
-        } 
+        }
     }
 }

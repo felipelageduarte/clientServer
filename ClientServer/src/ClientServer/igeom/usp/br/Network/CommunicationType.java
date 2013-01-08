@@ -20,4 +20,5 @@ public enum CommunicationType {
     IncommingData,
     SendData,
     NewClient,
+    ClientDown,
 }

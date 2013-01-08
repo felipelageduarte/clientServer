@@ -22,25 +22,22 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         serverIPTextField.setText(localhost());
         this.clientServer = clientServer;
         clientServer.addObserver(this);
-
-        //clientStopped();
-        //serverStopped();
-
-//        if (clientServer.getClient() != null && !clientServer.getClient().isStopped()) {
-//            clientRunning();
-//        }
-//        if (clientServer.getServer() != null && !clientServer.getServer().isStopped()) {
-//            serverRunning();
-//        }
-
     }
 
     @Override
     public void update(Observable o, Object arg) {
         MessagePojo message = (MessagePojo) arg;
         switch (message.getReason()) {
+            case ClientDown:
+                if (clientServer.isServerRunning()) {
+                    updateClientListInterface(clientServer.getClientList());
+                } else if (clientServer.isClientRunning()){
+                    clientStopped();
+                }
             case ConnectionAccept:
-                clientServer.getClientList();
+                if (clientServer.isServerRunning()) {
+                    updateClientListInterface(clientServer.getClientList());
+                } 
                 break;
             default:
                 break;
@@ -149,15 +146,24 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
     }
 
     public void updateClientListInterface(ArrayList<String> list) {
+        String clientList = "";
         for (String client : list) {
-            serverClientListTextArea.setText(client + "\n");
+            clientList += client + "\n";
         }
+        serverClientListTextArea.setText(clientList);
     }
 
     private void Fechar() {
         /**/
          this.setVisible(false);
         /*/
+        clientServer.shutdown();
+        while (!clientServer.isStopped()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+            }
+        }
         System.exit(0);
         /**/
     }
