@@ -1,7 +1,7 @@
-package ClientServer.igeom.usp.br.Core;
+package felipelageduarte.br.Core;
 
-import ClientServer.igeom.usp.br.Log.Log;
-import ClientServer.igeom.usp.br.Network.MessagePojo;
+import felipelageduarte.br.Log.Log;
+import felipelageduarte.br.Network.MessagePojo;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;

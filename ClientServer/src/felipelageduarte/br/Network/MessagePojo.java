@@ -1,4 +1,4 @@
-package ClientServer.igeom.usp.br.Network;
+package felipelageduarte.br.Network;
 
 import java.io.Serializable;
 

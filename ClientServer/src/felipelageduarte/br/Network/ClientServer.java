@@ -1,10 +1,10 @@
-package ClientServer.igeom.usp.br.Network;
+package felipelageduarte.br.Network;
 
-import ClientServer.igeom.usp.br.Core.Client;
-import ClientServer.igeom.usp.br.Core.ClientConfiguration;
-import ClientServer.igeom.usp.br.Core.Server;
-import ClientServer.igeom.usp.br.Core.ServerConfiguration;
-import ClientServer.igeom.usp.br.Log.Log;
+import felipelageduarte.br.Core.Client;
+import felipelageduarte.br.Core.ClientConfiguration;
+import felipelageduarte.br.Core.Server;
+import felipelageduarte.br.Core.ServerConfiguration;
+import felipelageduarte.br.Log.Log;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;

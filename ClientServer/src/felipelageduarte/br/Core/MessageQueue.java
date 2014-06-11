@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package ClientServer.igeom.usp.br.Core;
+package felipelageduarte.br.Core;
 
-import ClientServer.igeom.usp.br.Network.CommunicationType;
-import ClientServer.igeom.usp.br.Network.MessagePojo;
+import felipelageduarte.br.Network.CommunicationType;
+import felipelageduarte.br.Network.MessagePojo;
 import java.util.LinkedList;
 
 public class MessageQueue {

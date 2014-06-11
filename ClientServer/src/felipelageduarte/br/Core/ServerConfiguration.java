@@ -1,4 +1,4 @@
-package ClientServer.igeom.usp.br.Core;
+package felipelageduarte.br.Core;
 
 public class ServerConfiguration{
 

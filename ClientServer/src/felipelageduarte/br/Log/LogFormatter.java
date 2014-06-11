@@ -1,4 +1,4 @@
-package ClientServer.igeom.usp.br.Log;
+package felipelageduarte.br.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

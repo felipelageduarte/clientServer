@@ -11,3 +11,4 @@
 /ClientServer/dist/
 *.log*
 *.jar
+/ClientServer/build/

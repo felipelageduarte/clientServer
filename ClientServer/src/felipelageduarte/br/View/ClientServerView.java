@@ -1,9 +1,9 @@
-package ClientServer.igeom.usp.br.View;
+package felipelageduarte.br.View;
 
-import ClientServer.igeom.usp.br.Core.ClientConfiguration;
-import ClientServer.igeom.usp.br.Core.ServerConfiguration;
-import ClientServer.igeom.usp.br.Network.ClientServer;
-import ClientServer.igeom.usp.br.Network.MessagePojo;
+import felipelageduarte.br.Core.ClientConfiguration;
+import felipelageduarte.br.Core.ServerConfiguration;
+import felipelageduarte.br.Network.ClientServer;
+import felipelageduarte.br.Network.MessagePojo;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -265,9 +265,9 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
             }
         });
 
-        applicationTabbedPane.setName("applicationTabbedPane");
+        applicationTabbedPane.setName("applicationTabbedPane"); // NOI18N
 
-        serverPanel.setName("serverPanel");
+        serverPanel.setName("serverPanel"); // NOI18N
 
         serverPortLabel.setText("Porta :");
         serverPortLabel.setName("serverPortLabel"); // NOI18N
@@ -291,14 +291,14 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         serverStatusLabel.setName("serverStatusLabel"); // NOI18N
 
         serverClientListScrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Lista Clientes Conectados"));
-        serverClientListScrollPane.setName("serverClientListScrollPane");
+        serverClientListScrollPane.setName("serverClientListScrollPane"); // NOI18N
 
         serverClientListTextArea.setBackground(new java.awt.Color(204, 204, 204));
         serverClientListTextArea.setColumns(20);
         serverClientListTextArea.setEditable(false);
         serverClientListTextArea.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         serverClientListTextArea.setRows(5);
-        serverClientListTextArea.setName("serverClientListTextArea");
+        serverClientListTextArea.setName("serverClientListTextArea"); // NOI18N
         serverClientListScrollPane.setViewportView(serverClientListTextArea);
 
         serverConnectButton.setText("Conectar");
@@ -332,9 +332,9 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         });
 
         serverPasswordLabel.setText("Password:");
-        serverPasswordLabel.setName("serverPasswordLabel");
+        serverPasswordLabel.setName("serverPasswordLabel"); // NOI18N
 
-        serverPasswordField.setName("serverPasswordField");
+        serverPasswordField.setName("serverPasswordField"); // NOI18N
         serverPasswordField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 serverPasswordFieldKeyReleased(evt);
@@ -342,13 +342,13 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         });
 
         serverPasswordCheckBox.setText("Habilitar");
-        serverPasswordCheckBox.setName("serverPasswordCheckBox");
+        serverPasswordCheckBox.setName("serverPasswordCheckBox"); // NOI18N
 
         serverClientEditCheckBox.setText("Habilitar Edição");
-        serverClientEditCheckBox.setName("serverClientEditCheckBox");
+        serverClientEditCheckBox.setName("serverClientEditCheckBox"); // NOI18N
 
         serverConfirmConectionCheckBox.setText("Confirmar a Conexão");
-        serverConfirmConectionCheckBox.setName("serverConfirmConectionCheckBox");
+        serverConfirmConectionCheckBox.setName("serverConfirmConectionCheckBox"); // NOI18N
 
         javax.swing.GroupLayout serverPanelLayout = new javax.swing.GroupLayout(serverPanel);
         serverPanel.setLayout(serverPanelLayout);
@@ -420,31 +420,31 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
 
         applicationTabbedPane.addTab("Server", serverPanel);
 
-        clientPanel.setName("clientPanel");
+        clientPanel.setName("clientPanel"); // NOI18N
 
         clientIPLabel.setText("IP : ");
-        clientIPLabel.setName("clientIPLabel");
+        clientIPLabel.setName("clientIPLabel"); // NOI18N
 
         clientIPTextField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         clientIPTextField.setText("127.0.0.1");
-        clientIPTextField.setName("clientIPTextField");
+        clientIPTextField.setName("clientIPTextField"); // NOI18N
 
         clientPortLabel.setText("Porta :");
-        clientPortLabel.setName("clientPortLabel");
+        clientPortLabel.setName("clientPortLabel"); // NOI18N
 
         clientPortSpinner.setModel(new javax.swing.SpinnerNumberModel(8080, 1025, 9999, 1));
-        clientPortSpinner.setName("clientPortSpinner");
+        clientPortSpinner.setName("clientPortSpinner"); // NOI18N
 
         clientStatusLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         clientStatusLabel.setForeground(new java.awt.Color(255, 0, 0));
         clientStatusLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         clientStatusLabel.setText("Desconectado");
-        clientStatusLabel.setName("clientStatusLabel");
+        clientStatusLabel.setName("clientStatusLabel"); // NOI18N
 
         clientConnectButton.setText("Conectar");
         clientConnectButton.setMaximumSize(new java.awt.Dimension(93, 23));
         clientConnectButton.setMinimumSize(new java.awt.Dimension(93, 23));
-        clientConnectButton.setName("clientConnectButton");
+        clientConnectButton.setName("clientConnectButton"); // NOI18N
         clientConnectButton.setPreferredSize(new java.awt.Dimension(93, 23));
         clientConnectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -453,7 +453,7 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         });
 
         clientDisconnectButton.setText("Desconectar");
-        clientDisconnectButton.setName("clientDisconnectButton");
+        clientDisconnectButton.setName("clientDisconnectButton"); // NOI18N
         clientDisconnectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 clientDisconnectButtonActionPerformed(evt);
@@ -463,7 +463,7 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         clientCloseButton.setText("Fechar");
         clientCloseButton.setMaximumSize(new java.awt.Dimension(93, 23));
         clientCloseButton.setMinimumSize(new java.awt.Dimension(93, 23));
-        clientCloseButton.setName("clientCloseButton");
+        clientCloseButton.setName("clientCloseButton"); // NOI18N
         clientCloseButton.setPreferredSize(new java.awt.Dimension(93, 23));
         clientCloseButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -472,14 +472,14 @@ public class ClientServerView extends javax.swing.JFrame implements Observer {
         });
 
         clientPasswordLabel.setText("Password:");
-        clientPasswordLabel.setName("clientPasswordLabel");
+        clientPasswordLabel.setName("clientPasswordLabel"); // NOI18N
 
-        clientPasswordField.setName("clientPasswordField");
+        clientPasswordField.setName("clientPasswordField"); // NOI18N
 
         clientNickNameLabel.setText("Apelido:");
-        clientNickNameLabel.setName("clientNickNameLabel");
+        clientNickNameLabel.setName("clientNickNameLabel"); // NOI18N
 
-        clientNickNameTextField.setName("clientNickNameTextField");
+        clientNickNameTextField.setName("clientNickNameTextField"); // NOI18N
 
         javax.swing.GroupLayout clientPanelLayout = new javax.swing.GroupLayout(clientPanel);
         clientPanel.setLayout(clientPanelLayout);

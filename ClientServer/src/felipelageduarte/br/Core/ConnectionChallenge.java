@@ -1,5 +1,5 @@
 
-package ClientServer.igeom.usp.br.Core;
+package felipelageduarte.br.Core;
 
 import java.util.Random;
 

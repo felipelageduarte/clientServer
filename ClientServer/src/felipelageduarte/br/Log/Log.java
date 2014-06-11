@@ -1,4 +1,4 @@
-package ClientServer.igeom.usp.br.Log;
+package felipelageduarte.br.Log;
 
 import java.io.IOException;
 import java.util.logging.*;

@@ -1,4 +1,4 @@
-package ClientServer.igeom.usp.br.Network;
+package felipelageduarte.br.Network;
 
 /**
  * Enumeration para comunicação entre cliente e servidor
